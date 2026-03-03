@@ -37,7 +37,7 @@ GeoChase operates on a microservices-inspired architecture to separate state man
 * PostgreSQL with PostGIS
 
 ## 👥 Contributors
-* [Adınız Soyadınız] - Lead Developer / Software Engineer
+* [Kerem ACAR]
 
 ---
 *Developed as a Software Design Applications project for the 2025-2026 Academic Year Spring Semester.*
