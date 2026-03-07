@@ -1,0 +1,63 @@
+# ==========================================
+# 1. İŞLETİM SİSTEMİ VE IDE DOSYALARI
+# ==========================================
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+ehthumbs.db
+$RECYCLE.BIN/
+.vscode/
+.idea/
+*.iml
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ==========================================
+# 2. FRONTEND (IONIC / ANGULAR / NODE)
+# ==========================================
+frontend/node_modules/
+frontend/dist/
+frontend/www/
+frontend/.angular/
+frontend/.npm/
+frontend/coverage/
+# Çevresel değişkenler (Şifreler ve API anahtarları asla GitHub'a atılmaz!)
+frontend/.env
+frontend/.env.*
+
+# ==========================================
+# 3. BACKEND (JAVA / SPRING BOOT / MAVEN)
+# ==========================================
+backend/target/
+backend/bin/
+backend/build/
+backend/out/
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+# Çevresel değişkenler ve gizli ayarlar
+backend/src/main/resources/application-secret.yml
+backend/.env
+
+# ==========================================
+# 4. AI SERVICE (PYTHON)
+# ==========================================
+ai-service/__pycache__/
+ai-service/*.py[cod]
+ai-service/*$py.class
+ai-service/venv/
+ai-service/env/
+ai-service/.venv/
+ai-service/pip-log.txt
+ai-service/pip-delete-this-directory.txt
+ai-service/.pytest_cache/
+# Çevresel değişkenler
+ai-service/.env
+
+Promt.txt
