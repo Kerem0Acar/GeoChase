@@ -42,7 +42,7 @@ backend/out/
 *.ear
 *.nar
 # Çevresel değişkenler ve gizli ayarlar
-backend/src/main/resources/application-secret.yml
+backend/src/main/resources/application.yml
 backend/.env
 
 # ==========================================
