@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/geochase_db
+    url: jdbc:postgresql://localhost:5432/GeoChase_Db
     username: postgres
     password: 1234 # Kendi PostgreSQL ?ifreni yazmay? unutma!
     driver-class-name: org.postgresql.Driver
