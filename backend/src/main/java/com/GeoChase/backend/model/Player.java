@@ -35,6 +35,4 @@ public class Player {
     protected void onCreate() {
         this.cratedAt = LocalDateTime.now();
     }
-
-
 }
