@@ -2,17 +2,22 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/GeoChase_Db
     username: postgres
-    password: 1234 # Kendi PostgreSQL ?ifreni yazmay? unutma!
+    password: 1234
     driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
-      ddl-auto: update # Java s?n?flar?m?z? otomatik olarak tablolara dönü?türür
-    show-sql: true     # Arka planda çal??an SQL kodlar?n? konsolda görmemizi sa?lar
+      ddl-auto: update
+    show-sql: true
     properties:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
 server:
-  port: 8080 # Spring Boot uygulamam?z?n çal??aca?? port
+  port: 8080
+
+
+jwt:
+  secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+  expiration: 86400000

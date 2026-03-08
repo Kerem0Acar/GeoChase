@@ -3,14 +3,14 @@ package com.GeoChase.backend.controller;
 import com.GeoChase.backend.dto.LoginRequest;
 import com.GeoChase.backend.model.Player;
 import com.GeoChase.backend.repository.PlayerRepository;
+import com.GeoChase.backend.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -22,6 +22,9 @@ public class PlayerController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private JwtUtil jwtUtil;
 
     @PostMapping("/register")
     public ResponseEntity<?> registerPlayer(@RequestBody Player player) {
@@ -55,7 +58,21 @@ public class PlayerController {
             return ResponseEntity.status(401).body("Error: Invalid username or password!");
         }
 
-        return ResponseEntity.ok().body("Login successful! Welcome back, "+player.getUsername());
+        String token = jwtUtil.generateToken(player.getUsername());
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Successfully logged in! Welcome back, " + player.getUsername());
+        response.put("token", token);
+
+        return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/profile")
+    public ResponseEntity<?> getUserProfile() {
+        String username = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName();
+
+        return ResponseEntity.ok("Successfully logged in "+ username + " with JWT password!" );
+    }
+
 
 }
