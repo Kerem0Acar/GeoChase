@@ -1,5 +1,6 @@
 package com.GeoChase.backend.controller;
 
+import com.GeoChase.backend.dto.LeaderboardResponse;
 import com.GeoChase.backend.dto.LoginRequest;
 import com.GeoChase.backend.model.Player;
 import com.GeoChase.backend.repository.PlayerRepository;
@@ -10,8 +11,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/players")
@@ -72,6 +75,18 @@ public class PlayerController {
         String username = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName();
 
         return ResponseEntity.ok("Successfully logged in "+ username + " with JWT password!" );
+    }
+
+    @GetMapping("/leaderboard")
+    public ResponseEntity<?> getLeaderboard(){
+
+        List<Player> topPlayers = playerRepository.findTop10ByOrderByScoreDesc();
+
+        List<LeaderboardResponse> leaderboard = topPlayers.stream()
+                .map(p -> new LeaderboardResponse(p.getUsername(), p.getScore()))
+                .toList();
+
+        return ResponseEntity.ok(leaderboard);
     }
 
 
