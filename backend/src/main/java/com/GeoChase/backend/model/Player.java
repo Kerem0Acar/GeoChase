@@ -40,6 +40,9 @@ public class Player {
     @OneToMany(mappedBy = "player", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Quest> quests = new ArrayList<>();
 
+    @Column(nullable = false, columnDefinition = "integer default 0")
+    private Integer score = 0;
+
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
     }

@@ -5,13 +5,11 @@ import com.GeoChase.backend.model.Player;
 import com.GeoChase.backend.model.Quest;
 import com.GeoChase.backend.repository.PlayerRepository;
 import com.GeoChase.backend.repository.QuestRepository;
+import com.GeoChase.backend.util.LocationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
@@ -51,6 +49,52 @@ public class QuestController {
         Quest savedQuest = questRepository.save(newQuest);
 
         return ResponseEntity.ok(savedQuest);
+
+    }
+    @PostMapping("/{questId}/complete")
+    public ResponseEntity<?> completeQuest(@PathVariable Long questId, @RequestBody QuestRequest questRequest) {
+
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<Player> optionalPlayer = playerRepository.findByUsername(username);
+
+        if (optionalPlayer.isEmpty()) {
+            return ResponseEntity.status(404).body("Error: Player not found!");
+        }
+        Player player = optionalPlayer.get();
+
+        Optional<Quest> questOptional = questRepository.findById(questId);
+        if (questOptional.isEmpty()) {
+            return ResponseEntity.status(404).body("Error: Quest not found!");
+        }
+        Quest quest = questOptional.get();
+
+        if(!quest.getPlayer().getId().equals(player.getId())){
+            return ResponseEntity.status(403).body("Error: You don't own this quest!");
+        }
+        if (!quest.getStatus().equals("ACTIVE")) {
+            return ResponseEntity.status(400).body("Error: Quest is already completed or failed!");
+        }
+
+        // 4. HAVERSINE DEVREDE: Mesafeyi ölç!
+        double distanceInMeters = LocationUtil.calculateDistance(
+                questRequest.getUserLatitude(), questRequest.getUserLongitude(),
+                quest.getTargetLatitude(), quest.getTargetLongitude()
+        );
+
+        // 5. Hedefe 50 metre veya daha fazla yaklaştı mı? (Tolerans mesafesi)
+        if (distanceInMeters <= 50.0) {
+            // BAŞARILI!
+            quest.setStatus("COMPLETED");
+            player.setScore(player.getScore() + quest.getPointReward()); // Puanı oyuncuya ekle
+
+            questRepository.save(quest);
+            playerRepository.save(player);
+
+            return ResponseEntity.ok("Congrats! You reach the goal. Earning Point: " + quest.getPointReward() + ". Total Point: " + player.getScore());
+        } else {
+            // BAŞARISIZ: Henüz yeterince yakın değil
+            return ResponseEntity.status(400).body("Remaining distance: " + Math.round(distanceInMeters) + " metre.");
+        }
 
     }
 }
