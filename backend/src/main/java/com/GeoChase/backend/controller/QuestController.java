@@ -5,12 +5,14 @@ import com.GeoChase.backend.model.Player;
 import com.GeoChase.backend.model.Quest;
 import com.GeoChase.backend.repository.PlayerRepository;
 import com.GeoChase.backend.repository.QuestRepository;
+import com.GeoChase.backend.service.RadarService;
 import com.GeoChase.backend.util.LocationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -23,11 +25,16 @@ public class QuestController {
     @Autowired
     private PlayerRepository playerRepository;
 
+    @Autowired
+    private RadarService radarService;
+
     @PostMapping("/generate")
     public ResponseEntity<?> generateDynamicQuest(@RequestBody QuestRequest questRequest) {
 
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         Optional<Player> optionalPlayer = playerRepository.findByUsername(username);
+
+        Map<String, Object> targetLocation = radarService.findRealWorldTarget(questRequest.getUserLatitude(), questRequest.getUserLongitude());
 
         if(optionalPlayer.isEmpty()){
             return ResponseEntity.status(404).body("Player not found!");
@@ -35,14 +42,11 @@ public class QuestController {
 
         Player player = optionalPlayer.get();
 
-        double targetLat = questRequest.getUserLatitude() + (Math.random() * 0.02 - 0.01);
-        double targetLong = questRequest.getUserLongitude() + (Math.random() * 0.02 - 0.01);
-
         Quest newQuest = new Quest();
         newQuest.setPlayer(player);
-        newQuest.setTargetName("To be get");
-        newQuest.setTargetLatitude(targetLat);
-        newQuest.setTargetLongitude(targetLong);
+        newQuest.setTargetName((String) targetLocation.get("name")); // Gerçek mekanın adı!
+        newQuest.setTargetLatitude((Double) targetLocation.get("lat"));
+        newQuest.setTargetLongitude((Double) targetLocation.get("lon"));
         newQuest.setPointReward(100);
         newQuest.setStatus("ACTIVE");
 
