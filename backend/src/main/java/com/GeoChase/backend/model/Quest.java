@@ -2,6 +2,9 @@ package com.GeoChase.backend.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "quests")
@@ -29,4 +32,8 @@ public class Quest {
 
     @Column(nullable = false)
     private Integer pointReward;
+
+    @CreationTimestamp
+    @Column(nullable = false, name = "created_at")
+    private LocalDateTime createdAt;
 }

@@ -1,6 +1,7 @@
 package com.GeoChase.backend.controller;
 
 import com.GeoChase.backend.dto.QuestRequest;
+import com.GeoChase.backend.dto.QuestResponse;
 import com.GeoChase.backend.model.Player;
 import com.GeoChase.backend.model.Quest;
 import com.GeoChase.backend.repository.PlayerRepository;
@@ -12,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -55,6 +57,7 @@ public class QuestController {
         return ResponseEntity.ok(savedQuest);
 
     }
+
     @PostMapping("/{questId}/complete")
     public ResponseEntity<?> completeQuest(@PathVariable Long questId, @RequestBody QuestRequest questRequest) {
 
@@ -100,5 +103,30 @@ public class QuestController {
             return ResponseEntity.status(400).body("Remaining distance: " + Math.round(distanceInMeters) + " metre.");
         }
 
+    }
+
+    @GetMapping("/my-quests")
+    public ResponseEntity<?> getMyQuests(){
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<Player> optionalPlayer = playerRepository.findByUsername(username);
+
+        if (optionalPlayer.isEmpty()) {
+            return ResponseEntity.status(404).body("Error: Player not found!");
+        }
+
+        Player player = optionalPlayer.get();
+
+        List<Quest> myQuests = questRepository.findByPlayerIdOrderByCreatedAtDesc(player.getId());
+
+        List<QuestResponse> questHistory = myQuests.stream()
+                .map(q -> new QuestResponse(
+                        q.getId(),
+                        q.getTargetName(),
+                        q.getStatus(),
+                        q.getPointReward(),
+                        q.getCreatedAt()
+                )).toList();
+
+        return ResponseEntity.ok(questHistory);
     }
 }
