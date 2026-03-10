@@ -36,13 +36,18 @@ public class QuestController {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         Optional<Player> optionalPlayer = playerRepository.findByUsername(username);
 
-        Map<String, Object> targetLocation = radarService.findRealWorldTarget(questRequest.getUserLatitude(), questRequest.getUserLongitude());
-
         if(optionalPlayer.isEmpty()){
             return ResponseEntity.status(404).body("Player not found!");
         }
 
         Player player = optionalPlayer.get();
+
+        boolean hasActiveQuest = questRepository.existsByPlayerIdAndStatus(player.getId(), "ACTIVE");
+        if(hasActiveQuest){
+            return ResponseEntity.status(400).body("You already have an active task! You must complete or cancel the current task before setting a new goal.");
+        }
+
+        Map<String, Object> targetLocation = radarService.findRealWorldTarget(questRequest.getUserLatitude(), questRequest.getUserLongitude());
 
         Quest newQuest = new Quest();
         newQuest.setPlayer(player);
@@ -129,4 +134,36 @@ public class QuestController {
 
         return ResponseEntity.ok(questHistory);
     }
+
+    @PostMapping("/{questId}/abandon")
+    public ResponseEntity<?> abandonQuest(@PathVariable Long questId){
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<Player> optionalPlayer = playerRepository.findByUsername(username);
+
+        if (optionalPlayer.isEmpty()) {
+            return ResponseEntity.status(404).body("Error: Player not found!");
+        }
+        Player player = optionalPlayer.get();
+
+        Optional<Quest> questOptional = questRepository.findById(questId);
+        if (questOptional.isEmpty()) {
+            return ResponseEntity.status(404).body("Error: Quest not found!");
+        }
+        Quest quest = questOptional.get();
+
+        if(!quest.getPlayer().getId().equals(player.getId())){
+            return ResponseEntity.status(403).body("Error: You don't own this quest!");
+        }
+
+        if(!quest.getStatus().equals("ACTIVE")){
+            return ResponseEntity.status(400).body("Error: Quest is already completed or failed!");
+        }
+
+        quest.setStatus("ABANDONED");
+        questRepository.save(quest);
+
+        return ResponseEntity.ok("Quest has been abandoned!");
+    }
+
+
 }
