@@ -49,12 +49,22 @@ public class QuestController {
 
         Map<String, Object> targetLocation = radarService.findRealWorldTarget(questRequest.getUserLatitude(), questRequest.getUserLongitude());
 
+        Double targetLat =  (Double) targetLocation.get("lat");
+        Double targetLon =  (Double) targetLocation.get("lon");
+        String targetName = (String) targetLocation.get("name"); // Gerçek mekanın adı!
+
+        double distanceInMeters = LocationUtil.calculateDistance(
+                questRequest.getUserLatitude(), questRequest.getUserLongitude(), targetLat, targetLon
+        );
+
+        int calculatedPointReward = 50 + (int) (distanceInMeters / 10);
+
         Quest newQuest = new Quest();
         newQuest.setPlayer(player);
-        newQuest.setTargetName((String) targetLocation.get("name")); // Gerçek mekanın adı!
-        newQuest.setTargetLatitude((Double) targetLocation.get("lat"));
-        newQuest.setTargetLongitude((Double) targetLocation.get("lon"));
-        newQuest.setPointReward(100);
+        newQuest.setTargetName(targetName);
+        newQuest.setTargetLatitude(targetLat);
+        newQuest.setTargetLongitude(targetLon);
+        newQuest.setPointReward(calculatedPointReward);
         newQuest.setStatus("ACTIVE");
 
         Quest savedQuest = questRepository.save(newQuest);
