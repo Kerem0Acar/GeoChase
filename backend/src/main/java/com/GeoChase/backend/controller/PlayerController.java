@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/players")
+@io.swagger.v3.oas.annotations.security.SecurityRequirement(name = "Bearer Authentication")
 public class PlayerController {
 
     @Autowired

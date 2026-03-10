@@ -28,7 +28,11 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/players/register" , "/api/players/login", "/error").permitAll()
+                        .requestMatchers("/api/players/register",
+                                "/api/players/login",
+                                "/error","/v3/api-docs/**",       // Swagger Verileri
+                                "/swagger-ui/**",                 // Swagger Arayüzü
+                                "/swagger-ui.html").permitAll()
                 .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
