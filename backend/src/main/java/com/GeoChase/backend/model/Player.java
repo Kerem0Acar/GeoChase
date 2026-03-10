@@ -43,6 +43,12 @@ public class Player {
     @Column(nullable = false, columnDefinition = "integer default 0")
     private Integer score = 0;
 
+    @Column(nullable = false, columnDefinition = "integer default 1")
+    private Integer level = 1;
+
+    @Column(nullable = false, columnDefinition = "varchar(255) default 'Rookie'")
+    private String title = "Rookie";
+
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
     }

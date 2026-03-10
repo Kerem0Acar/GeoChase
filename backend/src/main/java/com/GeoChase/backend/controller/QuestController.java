@@ -107,12 +107,29 @@ public class QuestController {
         if (distanceInMeters <= 50.0) {
             // BAŞARILI!
             quest.setStatus("COMPLETED");
-            player.setScore(player.getScore() + quest.getPointReward()); // Puanı oyuncuya ekle
+
+            int newTotalScore = player.getScore() + quest.getPointReward();
+            player.setScore(newTotalScore);
+
+            String levelUpMessage = "";
+            if (newTotalScore >= 2000 && player.getLevel() < 4) {
+                player.setLevel(4);
+                player.setTitle("Legendary Scout");
+                levelUpMessage = "LEVEL UP! New title: Legendary Scout!";
+            } else if (newTotalScore >= 1000 && player.getLevel() < 3) {
+                player.setLevel(3);
+                player.setTitle("Master");
+                levelUpMessage = "LEVEL UP! New title: Master!";
+            } else if (newTotalScore >= 500 && player.getLevel() < 2) {
+                player.setLevel(2);
+                player.setTitle("Traveler");
+                levelUpMessage = "LEVEL UP! New title: Traveler!";
+            }
 
             questRepository.save(quest);
             playerRepository.save(player);
 
-            return ResponseEntity.ok("Congrats! You reach the goal. Earning Point: " + quest.getPointReward() + ". Total Point: " + player.getScore());
+            return ResponseEntity.ok("Congrats! You reach the goal. Earning Point: " + quest.getPointReward() + ". Total Point: " + player.getScore() +" "+ levelUpMessage);
         } else {
             // BAŞARISIZ: Henüz yeterince yakın değil
             return ResponseEntity.status(400).body("Remaining distance: " + Math.round(distanceInMeters) + " metre.");

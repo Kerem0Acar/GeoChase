@@ -2,6 +2,7 @@ package com.GeoChase.backend.controller;
 
 import com.GeoChase.backend.dto.LeaderboardResponse;
 import com.GeoChase.backend.dto.LoginRequest;
+import com.GeoChase.backend.dto.PlayerProfileResponse;
 import com.GeoChase.backend.model.Player;
 import com.GeoChase.backend.repository.PlayerRepository;
 import com.GeoChase.backend.util.JwtUtil;
@@ -73,8 +74,23 @@ public class PlayerController {
     @GetMapping("/profile")
     public ResponseEntity<?> getUserProfile() {
         String username = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<Player> playerOptional = playerRepository.findByUsername(username);
 
-        return ResponseEntity.ok("Successfully logged in "+ username + " with JWT password!" );
+        if(playerOptional.isEmpty()) {
+            return ResponseEntity.status(404).body("Error: Player not found!");
+        }
+
+        Player player = playerOptional.get();
+
+        PlayerProfileResponse profileResponse = new PlayerProfileResponse(
+                player.getUsername(),
+                player.getEmail(),
+                player.getScore(),
+                player.getLevel(),
+                player.getTitle()
+        );
+
+        return ResponseEntity.ok(profileResponse);
     }
 
     @GetMapping("/leaderboard")
