@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
@@ -24,6 +24,14 @@ export class Auth {
 
               })
             )
+  }
+
+  getProfile(): Observable<any> {
+    const token = localStorage.getItem('jwt_token');
+
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    
+    return this.http.get<any>(`${this.apiUrl}/profile`, {headers});
   }
   
 }
