@@ -1,0 +1,26 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="dark">
+    <ion-title>GeoChase</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <div style="text-align: center; margin-top: 50px; margin-bottom: 30px;">
+    <h2>Hoş Geldin, Kaşif!</h2>
+    <p>Maceraya başlamak için giriş yap.</p>
+  </div>
+
+  <ion-item>
+    <ion-label position="floating">Kullanıcı Adı</ion-label>
+    <ion-input type="text" [(ngModel)]="username" placeholder=""></ion-input>
+  </ion-item>
+
+  <ion-item>
+    <ion-label position="floating">Şifre</ion-label>
+    <ion-input type="password" [(ngModel)]="password" placeholder="Şifren"></ion-input>
+  </ion-item>
+
+  <ion-button expand="block" color="primary" class="ion-margin-top" (click)="onLogin()">
+    Maceraya Başla (Giriş)
+  </ion-button>
+</ion-content>
