@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { 
-  IonHeader, IonToolbar, IonTitle, IonContent, 
+  IonHeader, IonToolbar, IonTitle, IonContent,IonButton, 
   IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCardContent,
   IonText
 } from '@ionic/angular/standalone';
 import { Auth } from '../services/auth';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-home',
@@ -13,7 +14,7 @@ import { Auth } from '../services/auth';
   styleUrls: ['home.page.scss'],
   standalone: true,
   imports: [
-    IonHeader, IonToolbar, IonTitle, IonContent, 
+    IonHeader, IonToolbar, IonTitle, IonContent,IonButton,
     IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCardContent,
     IonText, CommonModule
   ],
@@ -22,7 +23,7 @@ export class HomePage implements OnInit{
 
   playerProfile: any = null;
 
-  constructor(private authService: Auth) {}
+  constructor(private authService: Auth, private router: Router) {}
 
   ngOnInit() {
     this.loadProfile();
@@ -39,4 +40,9 @@ export class HomePage implements OnInit{
       }
     })
   }
+
+  goToMap(){
+    this.router.navigate(['/map']);
+  }
+
 }
