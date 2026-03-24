@@ -1,6 +1,7 @@
 package com.GeoChase.backend.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -28,7 +29,7 @@ public class Player {
     @Column(unique = true, nullable = false, length = 100)
     private String email;
 
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Column(nullable = false)
     private String password;
 
@@ -49,6 +50,8 @@ public class Player {
     @Column(nullable = false, columnDefinition = "varchar(255) default 'Rookie'")
     private String title = "Rookie";
 
+
+    @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
     }

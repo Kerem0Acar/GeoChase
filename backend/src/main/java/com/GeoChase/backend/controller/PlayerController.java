@@ -45,6 +45,10 @@ public class PlayerController {
         String hashedPassword = passwordEncoder.encode(plainPassword);
         player.setPassword(hashedPassword);
 
+        player.setTitle("Novice");
+        player.setLevel(1);
+        player.setScore(0);
+
         Player savedPlayer = playerRepository.save(player);
         return ResponseEntity.ok().body(savedPlayer);
     }
