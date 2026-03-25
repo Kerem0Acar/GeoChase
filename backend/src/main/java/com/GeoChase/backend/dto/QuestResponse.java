@@ -13,4 +13,8 @@ public class QuestResponse {
     private String status;
     private Integer pointsReward;
     private LocalDateTime createdAt;
+
+    private Double targetLatitude;
+    private Double targetLongitude;
+    private String difficulty;
 }
