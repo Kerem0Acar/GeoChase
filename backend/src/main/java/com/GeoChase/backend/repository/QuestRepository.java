@@ -13,4 +13,6 @@ public interface QuestRepository extends JpaRepository<Quest,Long> {
 
     boolean existsByPlayerIdAndStatus(Long playerId, String status);
 
+    List<Quest> findByPlayerIdAndStatus(Long playerId, String status);
+
 }

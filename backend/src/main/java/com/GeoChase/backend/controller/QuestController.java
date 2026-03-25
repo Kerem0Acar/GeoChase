@@ -20,6 +20,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/quests")
 @io.swagger.v3.oas.annotations.security.SecurityRequirement(name = "Bearer Authentication")
+@CrossOrigin(origins = "*")
 public class QuestController {
 
     @Autowired
@@ -31,167 +32,145 @@ public class QuestController {
     @Autowired
     private RadarService radarService;
 
+
+
+
     @PostMapping("/generate")
     public ResponseEntity<?> generateDynamicQuest(@RequestBody QuestRequest questRequest) {
+        try {
+            Player player = getCurrentAuthenticatedPlayer();
 
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        Optional<Player> optionalPlayer = playerRepository.findByUsername(username);
+            if (questRepository.existsByPlayerIdAndStatus(player.getId(), "ACTIVE")) {
+                return ResponseEntity.status(400).body("You already have an active task! You must complete or cancel the current task before setting a new goal.");
+            }
 
-        if(optionalPlayer.isEmpty()){
-            return ResponseEntity.status(404).body("Player not found!");
+            Map<String, Object> targetLocation = radarService.findRealWorldTarget(questRequest.getUserLatitude(), questRequest.getUserLongitude());
+
+            Double targetLat = (Double) targetLocation.get("lat");
+            Double targetLon = (Double) targetLocation.get("lon");
+            String targetName = (String) targetLocation.get("name");
+
+            double distanceInMeters = LocationUtil.calculateDistance(
+                    questRequest.getUserLatitude(), questRequest.getUserLongitude(), targetLat, targetLon
+            );
+
+            int calculatedPointReward = 50 + (int) (distanceInMeters / 10);
+
+            Quest newQuest = new Quest();
+            newQuest.setPlayer(player);
+            newQuest.setTargetName(targetName);
+            newQuest.setTargetLatitude(targetLat);
+            newQuest.setTargetLongitude(targetLon);
+            newQuest.setPointReward(calculatedPointReward);
+            newQuest.setStatus("ACTIVE");
+
+            return ResponseEntity.ok(questRepository.save(newQuest));
+
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body(e.getMessage());
         }
-
-        Player player = optionalPlayer.get();
-
-        boolean hasActiveQuest = questRepository.existsByPlayerIdAndStatus(player.getId(), "ACTIVE");
-        if(hasActiveQuest){
-            return ResponseEntity.status(400).body("You already have an active task! You must complete or cancel the current task before setting a new goal.");
-        }
-
-        Map<String, Object> targetLocation = radarService.findRealWorldTarget(questRequest.getUserLatitude(), questRequest.getUserLongitude());
-
-        Double targetLat =  (Double) targetLocation.get("lat");
-        Double targetLon =  (Double) targetLocation.get("lon");
-        String targetName = (String) targetLocation.get("name"); // Gerçek mekanın adı!
-
-        double distanceInMeters = LocationUtil.calculateDistance(
-                questRequest.getUserLatitude(), questRequest.getUserLongitude(), targetLat, targetLon
-        );
-
-        int calculatedPointReward = 50 + (int) (distanceInMeters / 10);
-
-        Quest newQuest = new Quest();
-        newQuest.setPlayer(player);
-        newQuest.setTargetName(targetName);
-        newQuest.setTargetLatitude(targetLat);
-        newQuest.setTargetLongitude(targetLon);
-        newQuest.setPointReward(calculatedPointReward);
-        newQuest.setStatus("ACTIVE");
-
-        Quest savedQuest = questRepository.save(newQuest);
-
-        return ResponseEntity.ok(savedQuest);
-
     }
 
     @PostMapping("/{questId}/complete")
     public ResponseEntity<?> completeQuest(@PathVariable Long questId, @RequestBody QuestRequest questRequest) {
+        try {
+            Player player = getCurrentAuthenticatedPlayer();
 
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        Optional<Player> optionalPlayer = playerRepository.findByUsername(username);
+            Quest quest = questRepository.findById(questId)
+                    .orElseThrow(() -> new RuntimeException("Error: Quest not found!"));
 
-        if (optionalPlayer.isEmpty()) {
-            return ResponseEntity.status(404).body("Error: Player not found!");
-        }
-        Player player = optionalPlayer.get();
-
-        Optional<Quest> questOptional = questRepository.findById(questId);
-        if (questOptional.isEmpty()) {
-            return ResponseEntity.status(404).body("Error: Quest not found!");
-        }
-        Quest quest = questOptional.get();
-
-        if(!quest.getPlayer().getId().equals(player.getId())){
-            return ResponseEntity.status(403).body("Error: You don't own this quest!");
-        }
-        if (!quest.getStatus().equals("ACTIVE")) {
-            return ResponseEntity.status(400).body("Error: Quest is already completed or failed!");
-        }
-
-        // 4. HAVERSINE DEVREDE: Mesafeyi ölç!
-        double distanceInMeters = LocationUtil.calculateDistance(
-                questRequest.getUserLatitude(), questRequest.getUserLongitude(),
-                quest.getTargetLatitude(), quest.getTargetLongitude()
-        );
-
-        // 5. Hedefe 50 metre veya daha fazla yaklaştı mı? (Tolerans mesafesi)
-        if (distanceInMeters <= 50.0) {
-            // BAŞARILI!
-            quest.setStatus("COMPLETED");
-
-            int newTotalScore = player.getScore() + quest.getPointReward();
-            player.setScore(newTotalScore);
-
-            String levelUpMessage = "";
-            if (newTotalScore >= 2000 && player.getLevel() < 4) {
-                player.setLevel(4);
-                player.setTitle("Legendary Scout");
-                levelUpMessage = "LEVEL UP! New title: Legendary Scout!";
-            } else if (newTotalScore >= 1000 && player.getLevel() < 3) {
-                player.setLevel(3);
-                player.setTitle("Master");
-                levelUpMessage = "LEVEL UP! New title: Master!";
-            } else if (newTotalScore >= 500 && player.getLevel() < 2) {
-                player.setLevel(2);
-                player.setTitle("Traveler");
-                levelUpMessage = "LEVEL UP! New title: Traveler!";
+            if (!quest.getPlayer().getId().equals(player.getId())) {
+                return ResponseEntity.status(403).body("Error: You don't own this quest!");
+            }
+            if (!quest.getStatus().equals("ACTIVE")) {
+                return ResponseEntity.status(400).body("Error: Quest is already completed or failed!");
             }
 
-            questRepository.save(quest);
-            playerRepository.save(player);
+            double distanceInMeters = LocationUtil.calculateDistance(
+                    questRequest.getUserLatitude(), questRequest.getUserLongitude(),
+                    quest.getTargetLatitude(), quest.getTargetLongitude()
+            );
 
-            return ResponseEntity.ok("Congrats! You reach the goal. Earning Point: " + quest.getPointReward() + ". Total Point: " + player.getScore() +" "+ levelUpMessage);
-        } else {
-            // BAŞARISIZ: Henüz yeterince yakın değil
-            return ResponseEntity.status(400).body("Remaining distance: " + Math.round(distanceInMeters) + " metre.");
+            if (distanceInMeters <= 50.0) {
+                quest.setStatus("COMPLETED");
+
+                int newTotalScore = player.getScore() + quest.getPointReward();
+                player.setScore(newTotalScore);
+
+                String levelUpMessage = "";
+                if (newTotalScore >= 2000 && player.getLevel() < 4) {
+                    player.setLevel(4);
+                    player.setTitle("Legendary Scout");
+                    levelUpMessage = "LEVEL UP! New title: Legendary Scout!";
+                } else if (newTotalScore >= 1000 && player.getLevel() < 3) {
+                    player.setLevel(3);
+                    player.setTitle("Master");
+                    levelUpMessage = "LEVEL UP! New title: Master!";
+                } else if (newTotalScore >= 500 && player.getLevel() < 2) {
+                    player.setLevel(2);
+                    player.setTitle("Traveler");
+                    levelUpMessage = "LEVEL UP! New title: Traveler!";
+                }
+
+                questRepository.save(quest);
+                playerRepository.save(player);
+
+                return ResponseEntity.ok("Congrats! You reach the goal. Earning Point: " + quest.getPointReward() + ". Total Point: " + player.getScore() + " " + levelUpMessage);
+            } else {
+                return ResponseEntity.status(400).body("Remaining distance: " + Math.round(distanceInMeters) + " metre.");
+            }
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body(e.getMessage());
         }
-
     }
 
     @GetMapping("/my-quests")
-    public ResponseEntity<?> getMyQuests(){
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        Optional<Player> optionalPlayer = playerRepository.findByUsername(username);
+    public ResponseEntity<?> getMyQuests() {
+        try {
+            Player player = getCurrentAuthenticatedPlayer();
+            List<Quest> myQuests = questRepository.findByPlayerIdOrderByCreatedAtDesc(player.getId());
 
-        if (optionalPlayer.isEmpty()) {
-            return ResponseEntity.status(404).body("Error: Player not found!");
+            List<QuestResponse> questHistory = myQuests.stream()
+                    .map(q -> new QuestResponse(
+                            q.getId(),
+                            q.getTargetName(),
+                            q.getStatus(),
+                            q.getPointReward(),
+                            q.getCreatedAt()
+                    )).toList();
+
+            return ResponseEntity.ok(questHistory);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body(e.getMessage());
         }
-
-        Player player = optionalPlayer.get();
-
-        List<Quest> myQuests = questRepository.findByPlayerIdOrderByCreatedAtDesc(player.getId());
-
-        List<QuestResponse> questHistory = myQuests.stream()
-                .map(q -> new QuestResponse(
-                        q.getId(),
-                        q.getTargetName(),
-                        q.getStatus(),
-                        q.getPointReward(),
-                        q.getCreatedAt()
-                )).toList();
-
-        return ResponseEntity.ok(questHistory);
     }
 
     @PostMapping("/{questId}/abandon")
-    public ResponseEntity<?> abandonQuest(@PathVariable Long questId){
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        Optional<Player> optionalPlayer = playerRepository.findByUsername(username);
+    public ResponseEntity<?> abandonQuest(@PathVariable Long questId) {
+        try {
+            Player player = getCurrentAuthenticatedPlayer();
+            Quest quest = questRepository.findById(questId)
+                    .orElseThrow(() -> new RuntimeException("Error: Quest not found!"));
 
-        if (optionalPlayer.isEmpty()) {
-            return ResponseEntity.status(404).body("Error: Player not found!");
+            if (!quest.getPlayer().getId().equals(player.getId())) {
+                return ResponseEntity.status(403).body("Error: You don't own this quest!");
+            }
+            if (!quest.getStatus().equals("ACTIVE")) {
+                return ResponseEntity.status(400).body("Error: Quest is already completed or failed!");
+            }
+
+            quest.setStatus("ABANDONED");
+            questRepository.save(quest);
+
+            return ResponseEntity.ok("Quest has been abandoned!");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body(e.getMessage());
         }
-        Player player = optionalPlayer.get();
-
-        Optional<Quest> questOptional = questRepository.findById(questId);
-        if (questOptional.isEmpty()) {
-            return ResponseEntity.status(404).body("Error: Quest not found!");
-        }
-        Quest quest = questOptional.get();
-
-        if(!quest.getPlayer().getId().equals(player.getId())){
-            return ResponseEntity.status(403).body("Error: You don't own this quest!");
-        }
-
-        if(!quest.getStatus().equals("ACTIVE")){
-            return ResponseEntity.status(400).body("Error: Quest is already completed or failed!");
-        }
-
-        quest.setStatus("ABANDONED");
-        questRepository.save(quest);
-
-        return ResponseEntity.ok("Quest has been abandoned!");
     }
 
-
+    private Player getCurrentAuthenticatedPlayer() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        return playerRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Error: Player not found!"));
+    }
 }
