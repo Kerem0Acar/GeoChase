@@ -26,6 +26,10 @@ export class Auth {
             )
   }
 
+  register(data: any): Observable<any>{
+    return this.http.post(`${this.apiUrl}/register`, data, { responseType: 'text' });
+  }
+
   getProfile(): Observable<any> {
     const token = localStorage.getItem('jwt_token');
 

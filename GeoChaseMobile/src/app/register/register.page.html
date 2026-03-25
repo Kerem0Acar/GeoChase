@@ -1,0 +1,46 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar color="dark">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/main" text=""></ion-back-button>
+    </ion-buttons>
+    <ion-title class="cyber-title">SİSTEM KAYIT</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="cyber-bg" [fullscreen]="true">
+  <div class="login-container animate-fade-in">
+    
+    <div class="logo-container">
+      <div class="radar-scan"></div>
+      <ion-icon name="finger-print-outline" class="cyber-icon"></ion-icon>
+    </div>
+
+    <div class="header-text">
+      <h2>Güvenli Ağ Bağlantısı</h2>
+      <p>Yeni bir ajan kimliği oluşturuluyor.</p>
+    </div>
+
+    <div class="form-container">
+      
+      <ion-item class="cyber-input" lines="none">
+        <ion-icon name="person-outline" slot="start"></ion-icon>
+        <ion-input label="Ajan Kod Adı (Kullanıcı Adı)" labelPlacement="floating" type="text" [(ngModel)]="username"></ion-input>
+      </ion-item>
+
+      <ion-item class="cyber-input" lines="none">
+        <ion-icon name="mail-outline" slot="start"></ion-icon>
+        <ion-input label="İletişim Kanalı (E-Posta)" labelPlacement="floating" type="email" [(ngModel)]="email"></ion-input>
+      </ion-item>
+
+      <ion-item class="cyber-input" lines="none" style="margin-bottom: 25px;">
+        <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
+        <ion-input label="Erişim Şifresi Oluştur" labelPlacement="floating" type="password" [(ngModel)]="password"></ion-input>
+      </ion-item>
+
+      <ion-button expand="block" class="cyber-submit-btn" (click)="register()">
+        SİSTEME KAYIT OL
+      </ion-button>
+      
+    </div>
+  </div>
+</ion-content>

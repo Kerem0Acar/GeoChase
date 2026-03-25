@@ -32,6 +32,10 @@ export class LoginPage implements OnInit {
   ngOnInit() {
   }
 
+  goToRegister(){
+    this.router.navigate(['/register']);
+  }
+
   // Butona tıklandığında çalışacak fonksiyon
   onLogin() {
     console.log("Login requets has been sending...");

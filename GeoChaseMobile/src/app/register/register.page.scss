@@ -1,0 +1,135 @@
+/* 🌑 Arka Plan ve Sayfa Yapısı */
+.cyber-bg {
+  --background: #0d0d0d;
+  background: radial-gradient(circle at center, #1a1a1a 0%, #000000 100%);
+}
+
+/* 🟢 Üst Başlık (Neon Yazı) */
+.cyber-title {
+  color: #2dd36f;
+  font-weight: 800;
+  letter-spacing: 3px;
+  text-shadow: 0 0 10px rgba(45, 211, 111, 0.5);
+  text-align: center;
+}
+
+/* 📦 Formu Ekranın Ortasına Hizalama */
+.login-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* 🎯 Animasyonlu Radar / Parmak İzi Logosu */
+.logo-container {
+  position: relative;
+  width: 90px;
+  height: 90px;
+  margin: 0 auto 20px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 2px solid #2dd36f;
+  box-shadow: 0 0 20px rgba(45, 211, 111, 0.2);
+
+  .cyber-icon {
+    font-size: 45px;
+    color: #2dd36f;
+    z-index: 2;
+  }
+
+  /* Etrafında Dönen Radar Efekti */
+  .radar-scan {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg, transparent 70%, rgba(45, 211, 111, 0.4) 100%);
+    animation: spin 2s linear infinite;
+  }
+}
+
+@keyframes spin {
+  100% { transform: rotate(360deg); }
+}
+
+/* 📝 Yazı Stilleri */
+.header-text {
+  text-align: center;
+  margin-bottom: 30px;
+
+  h2 {
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 1.2rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+  }
+  p {
+    color: #888;
+    font-size: 0.9rem;
+    margin: 0;
+  }
+}
+
+/* 🗃️ Form Çerçevesi */
+.form-container {
+  background: rgba(20, 20, 20, 0.8);
+  padding: 25px 20px;
+  border-radius: 15px;
+  border: 1px solid #333;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+}
+
+/* 🖊️ Şık Input (Girdi) Alanları */
+.cyber-input {
+  --background: rgba(0, 0, 0, 0.4);
+  --border-radius: 8px;
+  --padding-start: 15px;
+  margin-bottom: 15px;
+  border: 1px solid #444;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+
+  ion-icon {
+    color: #2dd36f;
+    margin-right: 10px;
+  }
+
+  /* Tıklandığında Parlar */
+  &.item-has-focus {
+    border-color: #2dd36f;
+    box-shadow: 0 0 15px rgba(45, 211, 111, 0.2);
+  }
+}
+
+/* 🟢 Ana Kayıt Butonu */
+.cyber-submit-btn {
+  --background: #2dd36f;
+  --background-hover: #24a858;
+  --color: #000;
+  --border-radius: 8px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  --box-shadow: 0 0 20px rgba(45, 211, 111, 0.5);
+  transition: transform 0.1s;
+
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
+/* 🎬 Sahneye Çıkış Animasyonu */
+.animate-fade-in {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
