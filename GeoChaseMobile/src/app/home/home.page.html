@@ -1,6 +1,13 @@
 <ion-header [translucent]="true">
   <ion-toolbar color="primary">
     <ion-title style="font-weight: bold; letter-spacing: 1px;">GeoChase Karargahı</ion-title>
+    
+    <ion-buttons slot="end">
+      <ion-button (click)="goToProfile()" style="font-weight: bold;">
+        👤 Profil
+      </ion-button>
+    </ion-buttons>
+
   </ion-toolbar>
 </ion-header>
 
@@ -8,36 +15,17 @@
   
   <div *ngIf="!playerProfile" style="text-align: center; margin-top: 50px;">
     <ion-spinner name="crescent" color="primary"></ion-spinner>
-    <p>Ajan Profili Yükleniyor...</p>
+    <p>Karargaha Bağlanılıyor...</p>
   </div>
 
-  <div *ngIf="playerProfile">
-    <ion-card class="profile-card">
-      <img alt="Player Avatar" src="https://ionicframework.com/docs/img/demos/avatar.svg" style="max-height: 120px; margin: 20px auto 10px auto; display: block;" />
-      
-      <ion-card-header style="text-align: center; padding-bottom: 0;">
-        <ion-card-subtitle color="primary" style="font-weight: bold; letter-spacing: 2px;">SEVİYE {{ playerProfile.level }}</ion-card-subtitle>
-        <ion-card-title style="font-weight: bold; font-size: 1.5rem;">{{ playerProfile.username }}</ion-card-title>
-      </ion-card-header>
-
-      <ion-card-content style="text-align: center;">
-        <h2 style="font-size: 1.1rem; color: #666;">Unvan: <strong>{{ playerProfile.title }}</strong></h2>
-        <p style="font-size: 1.1rem; margin-top: 5px;">Toplam Puan: <ion-text color="success"><strong>{{ playerProfile.score }} XP</strong></ion-text></p>
-        
-       <div style="margin-top: 15px; text-align: left;">
-          <div style="display: flex; justify-content: space-between; font-size: 12px; color: #888; margin-bottom: 5px;">
-            <span>Mevcut: {{ playerProfile.score }} XP</span>
-            <span style="font-weight: bold; color: #28ba62;">Hedef: {{ getNextLevelScore() }} XP</span>
-          </div>
-          <div class="xp-bar-bg">
-            <div class="xp-bar-fill" [style.width.%]="getXpProgress()"></div>
-          </div>
-        </div>
-      </ion-card-content>
-    </ion-card>
+  <div *ngIf="playerProfile" style="margin-top: 10px; margin-bottom: 25px; padding: 15px; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-left: 5px solid var(--ion-color-primary);">
+    <h2 style="margin: 0; font-size: 1.4rem; font-weight: bold; color: #333;">Selam, {{ playerProfile.username }}!</h2>
+    <p style="margin: 5px 0 0 0; color: #666; font-size: 1rem;">
+      Seviye {{ playerProfile.level }} Ajan | Yeni emirlere hazır.
+    </p>
   </div>
 
-  <h3 style="margin-left: 5px; margin-top: 25px; font-weight: bold; color: #333;">Sistem Modülleri</h3>
+  <h3 style="margin-left: 5px; font-weight: bold; color: #333;">Sistem Modülleri</h3>
 
   <ion-card class="mode-card active-mode" (click)="goToMap()">
     <ion-card-header>

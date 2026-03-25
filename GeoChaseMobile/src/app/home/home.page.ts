@@ -4,8 +4,7 @@ import { Router } from '@angular/router';
 import { 
   IonHeader, IonToolbar, IonTitle, IonContent, IonButton, 
   IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCardContent,
-  IonText, IonSpinner
-} from '@ionic/angular/standalone';
+  IonText, IonSpinner, IonButtons } from '@ionic/angular/standalone';
 import { Auth } from '../services/auth';
 
 @Component({
@@ -13,7 +12,7 @@ import { Auth } from '../services/auth';
   templateUrl: 'home.page.html',
   styleUrls: ['home.page.scss'],
   standalone: true,
-  imports: [
+  imports: [IonButtons, 
     IonHeader, IonToolbar, IonTitle, IonContent, IonButton,
     IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCardContent,
     IonText, IonSpinner, CommonModule
@@ -27,6 +26,10 @@ export class HomePage implements OnInit {
 
   ngOnInit() {
     this.loadProfile();
+  }
+
+  goToProfile() {
+    this.router.navigate(['/profile']);
   }
 
   // Haritadan ana sayfaya dönüldüğünde yeni kazanılan puanları çeker

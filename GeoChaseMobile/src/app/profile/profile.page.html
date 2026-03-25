@@ -1,13 +1,47 @@
 <ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>profile</ion-title>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home" text="Geri"></ion-back-button>
+    </ion-buttons>
+    <ion-title style="font-weight: bold; letter-spacing: 1px;">Ajan Dosyası</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">profile</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content [fullscreen]="true" class="ion-padding" color="light">
+  
+  <div *ngIf="!playerProfile" style="text-align: center; margin-top: 50px;">
+    <ion-spinner name="crescent" color="primary"></ion-spinner>
+    <p>Gizli Dosyalar Çözümleniyor...</p>
+  </div>
+
+  <div *ngIf="playerProfile">
+    <ion-card class="profile-card">
+      <img alt="Player Avatar" src="https://ionicframework.com/docs/img/demos/avatar.svg" style="max-height: 120px; margin: 20px auto 10px auto; display: block;" />
+      
+      <ion-card-header style="text-align: center; padding-bottom: 0;">
+        <ion-card-subtitle color="primary" style="font-weight: bold; letter-spacing: 2px;">SEVİYE {{ playerProfile.level }}</ion-card-subtitle>
+        <ion-card-title style="font-weight: bold; font-size: 1.5rem;">{{ playerProfile.username }}</ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content style="text-align: center;">
+        <h2 style="font-size: 1.1rem; color: #666;">Unvan: <strong>{{ playerProfile.title }}</strong></h2>
+        <p style="font-size: 1.1rem; margin-top: 5px;">Toplam Puan: <ion-text color="success"><strong>{{ playerProfile.score }} XP</strong></ion-text></p>
+        
+        <div style="margin-top: 15px; text-align: left;">
+          <div style="display: flex; justify-content: space-between; font-size: 12px; color: #888; margin-bottom: 5px;">
+            <span>Mevcut: {{ playerProfile.score }} XP</span>
+            <span style="font-weight: bold; color: #28ba62;">Hedef: {{ getNextLevelScore() }} XP</span>
+          </div>
+          <div class="xp-bar-bg">
+            <div class="xp-bar-fill" [style.width.%]="getXpProgress()"></div>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    </div>
+
+    <ion-button expand="block" color="danger" (click)="logout()" style="margin-top: 40px; margin-bottom: 20px; font-weight: bold; letter-spacing: 1px; --border-radius: 8px;">
+      🚪 Sistemden Çıkış Yap
+    </ion-button>
 </ion-content>
