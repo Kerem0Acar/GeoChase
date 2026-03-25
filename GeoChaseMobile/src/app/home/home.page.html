@@ -1,31 +1,72 @@
 <ion-header [translucent]="true">
   <ion-toolbar color="primary">
-    <ion-title>GeoChase Karargahı</ion-title>
+    <ion-title style="font-weight: bold; letter-spacing: 1px;">GeoChase Karargahı</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true" class="ion-padding">
+<ion-content [fullscreen]="true" class="ion-padding" color="light">
   
   <div *ngIf="!playerProfile" style="text-align: center; margin-top: 50px;">
-    <p>Profil yükleniyor...</p>
+    <ion-spinner name="crescent" color="primary"></ion-spinner>
+    <p>Ajan Profili Yükleniyor...</p>
   </div>
 
   <div *ngIf="playerProfile">
-    <ion-card>
-      <img alt="Player Avatar" src="https://ionicframework.com/docs/img/demos/avatar.svg" style="max-height: 150px; margin: 20px auto; display: block;" />
+    <ion-card class="profile-card">
+      <img alt="Player Avatar" src="https://ionicframework.com/docs/img/demos/avatar.svg" style="max-height: 120px; margin: 20px auto 10px auto; display: block;" />
       
-      <ion-card-header style="text-align: center;">
-        <ion-card-subtitle color="secondary">Seviye {{ playerProfile.level }}</ion-card-subtitle>
-        <ion-card-title>{{ playerProfile.username }}</ion-card-title>
+      <ion-card-header style="text-align: center; padding-bottom: 0;">
+        <ion-card-subtitle color="primary" style="font-weight: bold; letter-spacing: 2px;">SEVİYE {{ playerProfile.level }}</ion-card-subtitle>
+        <ion-card-title style="font-weight: bold; font-size: 1.5rem;">{{ playerProfile.username }}</ion-card-title>
       </ion-card-header>
 
       <ion-card-content style="text-align: center;">
-        <h2 style="font-size: 1.2rem;">Unvan: <strong>{{ playerProfile.title }}</strong></h2>
-        <p style="font-size: 1.1rem; margin-top: 10px;">Toplam Puan: <ion-text color="success"><strong>{{ playerProfile.score }}</strong></ion-text></p>
+        <h2 style="font-size: 1.1rem; color: #666;">Unvan: <strong>{{ playerProfile.title }}</strong></h2>
+        <p style="font-size: 1.1rem; margin-top: 5px;">Toplam Puan: <ion-text color="success"><strong>{{ playerProfile.score }} XP</strong></ion-text></p>
+        
+        <div style="margin-top: 15px; text-align: left;">
+          <div style="display: flex; justify-content: space-between; font-size: 12px; color: #888; margin-bottom: 5px;">
+            <span>Mevcut İlerleme</span>
+            <span>Sonraki Seviye</span>
+          </div>
+          <div class="xp-bar-bg">
+            <div class="xp-bar-fill" [style.width.%]="getXpProgress()"></div>
+          </div>
+        </div>
       </ion-card-content>
     </ion-card>
   </div>
-    <ion-button expand="block" color="warning" class="ion-margin-top" (click)="goToMap()">
-    📡 Saha Radarına Geç
-  </ion-button>
+
+  <h3 style="margin-left: 5px; margin-top: 25px; font-weight: bold; color: #333;">Sistem Modülleri</h3>
+
+  <ion-card class="mode-card active-mode" (click)="goToMap()">
+    <ion-card-header>
+      <ion-card-title style="font-size: 1.2rem; color: #28ba62;">🌐 Saha Radarı (LBS)</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      GPS uydularına bağlan. Çevrendeki şifreli veri terminallerini bul, fiziken oraya git ve hackle! 
+      <div style="margin-top: 10px; font-weight: bold; color: #28ba62;">[ SİSTEM AKTİF - TIKLA ]</div>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card class="mode-card locked-mode" (click)="comingSoon('Bölge Savaşı (PvP)')">
+    <ion-card-header>
+      <ion-card-title style="font-size: 1.2rem; color: #eb445a;">⚔️ Bölge Savaşı</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      Şehrindeki kritik nodları diğer ajanlardan önce ele geçir ve takımının kontrolüne al.
+      <div style="margin-top: 10px; font-weight: bold; color: #eb445a;">[ ERİŞİM ENGELLENDİ ]</div>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card class="mode-card locked-mode" (click)="comingSoon('Kripto İstihbarat')">
+    <ion-card-header>
+      <ion-card-title style="font-size: 1.2rem; color: #eb445a;">🕵️ Kripto İstihbarat</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      Evinden çıkmadan ele geçirdiğin şifreli dosyaları analiz et ve ana hikayeyi çöz.
+      <div style="margin-top: 10px; font-weight: bold; color: #eb445a;">[ ERİŞİM ENGELLENDİ ]</div>
+    </ion-card-content>
+  </ion-card>
+
 </ion-content>

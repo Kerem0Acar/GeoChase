@@ -25,3 +25,48 @@
 #container a {
   text-decoration: none;
 }
+
+/* Profil Kartı Gölgelendirmesi */
+.profile-card {
+  border-radius: 15px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  border-top: 5px solid var(--ion-color-primary);
+}
+
+/* Basit XP Bar */
+.xp-bar-bg {
+  width: 100%;
+  height: 10px;
+  background: #e0e0e0;
+  border-radius: 5px;
+  overflow: hidden;
+}
+.xp-bar-fill {
+  height: 100%;
+  background: var(--ion-color-success, #2dd36f);
+  transition: width 0.5s ease-out; /* Dolarken animasyon yapar */
+}
+
+/* MOD KARTLARI GENEL STİLİ */
+.mode-card {
+  margin: 0 0 15px 0;
+  border-radius: 12px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
+/* AKTİF MOD (Harita) */
+.active-mode {
+  border: 1px solid #28ba62;
+  box-shadow: 0 4px 15px rgba(40, 186, 98, 0.15);
+}
+
+/* KİLİTLİ MODLAR */
+.locked-mode {
+  border: 1px solid #eb445a;
+  opacity: 0.65; /* Soluk görünür */
+  background: #fffafa;
+}
