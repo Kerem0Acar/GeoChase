@@ -5,6 +5,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -47,7 +48,21 @@ public class RadarService {
                 );
             }
         } catch (Exception e) {
-            System.out.println("Harita API'sine ulaşılamadı veya zaman aşımı: " + e.getMessage());
+            // 🛡️ B PLANI (FALLBACK): Overpass API çöktüyse oyunu durdurma!
+            // Oyuncunun 200-300 metre yakınına "Yedek" bir hedef at.
+            System.err.println("Overpass API Çöktü/Gecikti! Yedek plan devreye giriyor. Hata: " + e.getMessage());
+
+            Map<String, Object> fallbackTarget = new HashMap<>();
+
+            // Koordinatlara ufak rastgele bir sapma ekliyoruz (Yaklaşık 200-300 metre)
+            double randomLatOffset = (Math.random() - 0.5) * 0.005;
+            double randomLonOffset = (Math.random() - 0.5) * 0.005;
+
+            fallbackTarget.put("lat", lat + randomLatOffset);
+            fallbackTarget.put("lon", lon + randomLonOffset);
+            fallbackTarget.put("name", "Gizli Veri Terminali (Yedek Sinyal)");
+
+            return fallbackTarget;
         }
 
         return Map.of(
