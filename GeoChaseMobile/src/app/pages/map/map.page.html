@@ -10,3 +10,25 @@
 <ion-content [fullscreen]="true">
   <div id="mapId" style="width: 100%; height: 100%;"></div>
 </ion-content>
+
+
+<ng-template #questPopupTemplate let-quest="quest">
+  <div class="quest-popup">
+    <h3 class="quest-title" [ngStyle]="{'color': quest.color}">
+      {{ quest.title }}
+    </h3>
+    
+    <div class="quest-details">
+      <p class="quest-info">
+        📡 Mesafe: <b>{{ quest.distance }}m</b>
+      </p>
+      <p class="quest-info">
+        ⚖️ Zorluk: <b>{{ quest.difficulty }}</b> | Ödül: <b>{{ quest.points }} XP</b>
+      </p>
+    </div>
+
+    <ion-button expand="block" [color]="quest.color === '#eb445a' ? 'danger' : (quest.color === '#ffc409' ? 'warning' : 'success')" class="start-button">
+      📡 Hedefe Git
+    </ion-button>
+  </div>
+</ng-template>
