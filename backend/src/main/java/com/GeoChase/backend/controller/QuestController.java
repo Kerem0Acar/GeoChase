@@ -54,6 +54,8 @@ public class QuestController {
                     questRequest.getUserLatitude(), questRequest.getUserLongitude(), targetLat, targetLon
             );
 
+            String difficultyLevel = distanceInMeters > 500 ? "Hard" : (distanceInMeters > 200 ? "Mid" : "Basic");
+
             int calculatedPointReward = 50 + (int) (distanceInMeters / 10);
 
             Quest newQuest = new Quest();
@@ -62,6 +64,7 @@ public class QuestController {
             newQuest.setTargetLatitude(targetLat);
             newQuest.setTargetLongitude(targetLon);
             newQuest.setPointReward(calculatedPointReward);
+            newQuest.setDifficulty(difficultyLevel);
             newQuest.setStatus("ACTIVE");
 
             return ResponseEntity.ok(questRepository.save(newQuest));

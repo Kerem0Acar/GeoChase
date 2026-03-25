@@ -1,4 +1,4 @@
-<ion-header [translucent]="true">
+<ion-header>
   <ion-toolbar color="dark">
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/home"></ion-back-button>
@@ -7,28 +7,42 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <div id="mapId" style="width: 100%; height: 100%;"></div>
-</ion-content>
+<ion-content>
+  <div id="mapId" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 1;"></div>
 
-
-<ng-template #questPopupTemplate let-quest="quest">
-  <div class="quest-popup">
-    <h3 class="quest-title" [ngStyle]="{'color': quest.color}">
-      {{ quest.title }}
-    </h3>
+  <div class="hud-overlay">
     
-    <div class="quest-details">
-      <p class="quest-info">
-        📡 Mesafe: <b>{{ quest.distance }}m</b>
-      </p>
-      <p class="quest-info">
-        ⚖️ Zorluk: <b>{{ quest.difficulty }}</b> | Ödül: <b>{{ quest.points }} XP</b>
-      </p>
+    <div *ngIf="!activeQuest" class="scan-container">
+      <ion-button expand="block" shape="round" color="primary" size="large" 
+                  (click)="scanForQuests()" [disabled]="isScanning" class="scan-btn">
+        <ion-spinner *ngIf="isScanning" name="crescent" slot="start"></ion-spinner>
+        {{ isScanning ? 'Bölge Taranıyor...' : 'Saha Taraması Yap' }}
+      </ion-button>
     </div>
 
-    <ion-button expand="block" [color]="quest.color === '#eb445a' ? 'danger' : (quest.color === '#ffc409' ? 'warning' : 'success')" class="start-button">
-      📡 Hedefe Git
-    </ion-button>
+    <ion-card *ngIf="activeQuest" class="quest-card">
+      <ion-card-header>
+        <ion-card-title color="warning" class="ion-text-center">
+          ⚡ HEDEF TESPİT EDİLDİ
+        </ion-card-title>
+      </ion-card-header>
+      
+      <ion-card-content class="ion-text-center">
+        <h2 style="font-weight: bold; font-size: 20px; margin-bottom: 5px; color: white;">
+          {{ activeQuest.targetName }}
+        </h2>
+        <p style="font-size: 16px; margin-bottom: 15px; color: #a2a2a2;">
+          Ödül: <b style="color: #2dd36f;">{{ activeQuest.pointReward }} XP</b>
+        </p>
+
+        <ion-button expand="block" color="success" (click)="tryCompleteQuest()">
+          📡 Hedefe Ulaştım (Hack)
+        </ion-button>
+        <ion-button expand="block" fill="clear" color="danger" (click)="abandonQuest()" style="margin-top: 5px;">
+          Görevi İptal Et
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+
   </div>
-</ng-template>
+</ion-content>
