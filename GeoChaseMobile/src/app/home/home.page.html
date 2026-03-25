@@ -24,10 +24,10 @@
         <h2 style="font-size: 1.1rem; color: #666;">Unvan: <strong>{{ playerProfile.title }}</strong></h2>
         <p style="font-size: 1.1rem; margin-top: 5px;">Toplam Puan: <ion-text color="success"><strong>{{ playerProfile.score }} XP</strong></ion-text></p>
         
-        <div style="margin-top: 15px; text-align: left;">
+       <div style="margin-top: 15px; text-align: left;">
           <div style="display: flex; justify-content: space-between; font-size: 12px; color: #888; margin-bottom: 5px;">
-            <span>Mevcut İlerleme</span>
-            <span>Sonraki Seviye</span>
+            <span>Mevcut: {{ playerProfile.score }} XP</span>
+            <span style="font-weight: bold; color: #28ba62;">Hedef: {{ getNextLevelScore() }} XP</span>
           </div>
           <div class="xp-bar-bg">
             <div class="xp-bar-fill" [style.width.%]="getXpProgress()"></div>

@@ -45,17 +45,6 @@ export class HomePage implements OnInit {
     });
   }
 
-  // 📊 YENİ: XP BAR HESAPLAYICI (playerProfile.score kullanılarak)
-  getXpProgress(): number {
-    if (!this.playerProfile || this.playerProfile.score === undefined) return 0;
-    
-    const currentScore = this.playerProfile.score;
-    const requiredScoreForNextLevel = 500; // Şimdilik 500'de bir seviye atlıyor sayalım
-    const scoreInCurrentLevel = currentScore % requiredScoreForNextLevel;
-    
-    return (scoreInCurrentLevel / requiredScoreForNextLevel) * 100;
-  }
-
   // 🌐 MOD 1: Harita
   goToMap() {
     this.router.navigate(['/map']);
@@ -65,4 +54,47 @@ export class HomePage implements OnInit {
   comingSoon(modeName: string) {
     alert(`🚨 ${modeName} modu şu an geliştirme aşamasında Ajan!`);
   }
+
+  getXpProgress(): number {
+    if (!this.playerProfile || this.playerProfile.score === undefined) return 0;
+    
+    const score = this.playerProfile.score;
+    const level = this.playerProfile.level || 1;
+
+    let minScore = 0;
+    let maxScore = 500;
+
+    // Senin backend'deki if-else mantığının Frontend'deki karşılığı
+    if (level === 1) { 
+      minScore = 0; 
+      maxScore = 500; 
+    } 
+    else if (level === 2) { 
+      minScore = 500; 
+      maxScore = 1000; 
+    } 
+    else if (level === 3) { 
+      minScore = 1000; 
+      maxScore = 2000; 
+    } 
+    else { 
+      return 100; // Level 4 veya üstü (Maksimum Seviye) bar hep full kalır
+    }
+
+    // Seviye içindeki ilerlemeyi yüzdelik olarak hesapla
+    const progress = ((score - minScore) / (maxScore - minScore)) * 100;
+    return Math.min(Math.max(progress, 0), 100); // %0 ile %100 arasında tutar
+  }
+
+  // 🎯 HEDEF SKOR GÖSTERİCİ (UI'da sonraki seviyeye ne kadar kaldığını yazmak için)
+  getNextLevelScore(): number | string {
+    if (!this.playerProfile) return 500;
+    const level = this.playerProfile.level || 1;
+
+    if (level === 1) return 500;
+    if (level === 2) return 1000;
+    if (level === 3) return 2000;
+    return 'MAX';
+  }
+
 }
