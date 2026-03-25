@@ -28,11 +28,20 @@ export class Quest {
   }
 
   generateQuest(lat: number, lng: number): Observable<any> {
-    const body = { 
+    const payload = { 
       userLatitude: lat, 
       userLongitude: lng 
     };
-    return this.http.post(`${this.apiUrl}/generate`, body, { headers: this.getHeaders() });
+    return this.http.post(`${this.apiUrl}/generate`,payload, {
+      headers: this.getHeaders()
+    });
+  }
+
+  acceptQuest(questId: number): Observable<any>{
+    return this.http.post(`${this.apiUrl}/${questId}/accept`, {}, { 
+      headers: this.getHeaders(), 
+      responseType: 'text' 
+    });
   }
 
   // 🎯 Görevi Tamamlamayı Dene (Haversine ile mesafeyi ölçer)
