@@ -115,4 +115,35 @@
     transform: scale(2.5); 
     opacity: 0;            
   }
+  
+}
+// 📱 HUD (YÜZEN ARAYÜZ) STİLLERİ
+.hud-overlay {
+  position: absolute;
+  bottom: 30px; // Ekranın altından biraz yukarıda
+  left: 0;
+  width: 100%;
+  padding: 0 15px;
+  z-index: 1000; // ÇOK ÖNEMLİ: Haritanın (Leaflet) üstüne çıkmasını sağlar!
+  pointer-events: none; // Haritayı kaydırmayı engellemesin diye
+}
+
+// Kartların ve butonların tıklanabilir olması için
+.scan-container ion-button, .quest-card {
+  pointer-events: auto; 
+}
+
+// Havalı Buton Gölgeleri
+.scan-btn {
+  --box-shadow: 0 8px 20px rgba(56, 128, 255, 0.5);
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+// Karanlık Oyun Temalı Görev Kartı
+.quest-card {
+  background: rgba(20, 20, 20, 0.95);
+  border: 1px solid #ffc409;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
 }
