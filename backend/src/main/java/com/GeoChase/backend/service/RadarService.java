@@ -15,9 +15,6 @@ public class RadarService {
     public Map<String, Object> findRealWorldTarget(double lat, double lon) {
         RestTemplate restTemplate = new RestTemplate();
 
-        // 1. RADAR GÜNCELLEMESİ:
-        // ["amenity"]["name"] -> Sadece "Tesis" (Kafe, Restoran, Eczane, Okul vb.) olan ve "İsmi" olan yerleri bul.
-        // out 10 -> Etraftaki 10 farklı mekanı getir (oyun dinamik olsun diye).
         String overpassQuery = "[out:json];node(around:1500," + lat + "," + lon + ")[\"amenity\"][\"name\"];out 10;";
 
         try {
