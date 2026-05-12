@@ -34,6 +34,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/players/register",
                                 "/api/players/login",
+                                "/api/zombies/**",
                                 "/error","/v3/api-docs/**",       // Swagger Verileri
                                 "/swagger-ui/**",                 // Swagger Arayüzü
                                 "/swagger-ui.html").permitAll()

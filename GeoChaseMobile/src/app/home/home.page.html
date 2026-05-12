@@ -1,7 +1,7 @@
 <ion-header [translucent]="true">
   <ion-toolbar color="primary">
     <ion-title style="font-weight: bold; letter-spacing: 1px;">GeoChase Karargahı</ion-title>
-    
+
     <ion-buttons slot="end">
       <ion-button (click)="goToProfile()" style="font-weight: bold;">
         👤 Profil
@@ -12,7 +12,7 @@
 </ion-header>
 
 <ion-content [fullscreen]="true" class="ion-padding" color="light">
-  
+
   <div *ngIf="!playerProfile" style="text-align: center; margin-top: 50px;">
     <ion-spinner name="crescent" color="primary"></ion-spinner>
     <p>Karargaha Bağlanılıyor...</p>
@@ -32,7 +32,7 @@
       <ion-card-title style="font-size: 1.2rem; color: #28ba62;">🌐 Saha Radarı (LBS)</ion-card-title>
     </ion-card-header>
     <ion-card-content>
-      GPS uydularına bağlan. Çevrendeki şifreli veri terminallerini bul, fiziken oraya git ve hackle! 
+      GPS uydularına bağlan. Çevrendeki şifreli veri terminallerini bul, fiziken oraya git ve hackle!
       <div style="margin-top: 10px; font-weight: bold; color: #28ba62;">[ SİSTEM AKTİF - TIKLA ]</div>
     </ion-card-content>
   </ion-card>
@@ -47,13 +47,13 @@
     </ion-card-content>
   </ion-card>
 
-  <ion-card class="mode-card locked-mode" (click)="comingSoon('Kripto İstihbarat')">
+  <ion-card class="mode-card active-mode" (click)="startZombieMode()" style="border: 1px solid #eb445a;">
     <ion-card-header>
-      <ion-card-title style="font-size: 1.2rem; color: #eb445a;">🕵️ Kripto İstihbarat</ion-card-title>
+      <ion-card-title style="font-size: 1.2rem; color: #eb445a;">💀 Karantina Bölgesi (Zombi)</ion-card-title>
     </ion-card-header>
     <ion-card-content>
-      Evinden çıkmadan ele geçirdiğin şifreli dosyaları analiz et ve ana hikayeyi çöz.
-      <div style="margin-top: 10px; font-weight: bold; color: #eb445a;">[ ERİŞİM ENGELLENDİ ]</div>
+      Biyolojik tehdit altındaki bölgelere gir. Sinyalleri hacklerken hayatta kalmaya çalış ve pusuya düşme!
+      <div style="margin-top: 10px; font-weight: bold; color: #eb445a;">[ SİSTEM AKTİF - TIKLA ]</div>
     </ion-card-content>
   </ion-card>
 

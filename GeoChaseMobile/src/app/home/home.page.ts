@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import {
   IonHeader, IonToolbar, IonTitle, IonContent, IonButton,
   IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCardContent,
-  IonText, IonSpinner, IonButtons } from '@ionic/angular/standalone';
+  IonIcon, IonSpinner, IonButtons } from '@ionic/angular/standalone';
 import { Auth } from '../services/auth';
 
 @Component({
@@ -12,17 +12,29 @@ import { Auth } from '../services/auth';
   templateUrl: 'home.page.html',
   styleUrls: ['home.page.scss'],
   standalone: true,
-  imports: [IonButtons,
-    IonHeader, IonToolbar, IonTitle, IonContent, IonButton,
-    IonCard, IonCardHeader, IonCardTitle, IonCardContent,
-    IonSpinner, CommonModule
+  imports: [
+    IonButtons,
+    IonHeader,
+    IonToolbar,
+    IonTitle,
+    IonContent,
+    IonButton,
+    IonCard,
+    IonCardHeader,
+    IonCardTitle,
+    IonCardContent,
+    IonIcon,
+    IonSpinner,
+    CommonModule,
   ],
 })
 export class HomePage implements OnInit {
-
   playerProfile: any = null;
 
-  constructor(private authService: Auth, private router: Router) {}
+  constructor(
+    private authService: Auth,
+    private router: Router,
+  ) {}
 
   ngOnInit() {
     this.loadProfile();
@@ -43,8 +55,8 @@ export class HomePage implements OnInit {
         this.playerProfile = data;
       },
       error: (err) => {
-        console.error("Profil çekilirken hata oluştu: ", err);
-      }
+        console.error('Profil çekilirken hata oluştu: ', err);
+      },
     });
   }
 
@@ -71,16 +83,13 @@ export class HomePage implements OnInit {
     if (level === 1) {
       minScore = 0;
       maxScore = 500;
-    }
-    else if (level === 2) {
+    } else if (level === 2) {
       minScore = 500;
       maxScore = 1000;
-    }
-    else if (level === 3) {
+    } else if (level === 3) {
       minScore = 1000;
       maxScore = 2000;
-    }
-    else {
+    } else {
       return 100; // Level 4 veya üstü (Maksimum Seviye) bar hep full kalır
     }
 
@@ -100,4 +109,8 @@ export class HomePage implements OnInit {
     return 'MAX';
   }
 
+  startZombieMode() {
+    // Ajanı haritaya 'zombie' parametresiyle yolluyoruz
+    this.router.navigate(['/map'], { queryParams: { mode: 'zombie' } });
+  }
 }
