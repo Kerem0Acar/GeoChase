@@ -36,25 +36,20 @@ def get_street_route(start_lat, start_lng, end_lat, end_lng):
 @app.post("/api/zombies/ambush")
 def trigger_ambush(request: AmbushRequest):
     zombies = []
+    # 0: Sokak Gezgini (Rotalı), 1: Sıçrayan (Kuş Uçuşu), 2: Avcı (Rotalı)
     zombie_types = ["Sokak Gezgini", "Sıçrayan", "Avcı"]
 
-    # 3 Adet zombi oluşturuyoruz
     for i in range(3):
-        # Oyuncunun 100-300 metre etrafında rastgele spawn noktaları
-        offset_lat = random.uniform(-0.003, 0.003)
-        offset_lng = random.uniform(-0.003, 0.003)
+        z_lat = request.lat + random.uniform(-0.002, 0.002)
+        z_lng = request.lng + random.uniform(-0.002, 0.002)
 
-        z_lat = request.lat + offset_lat
-        z_lng = request.lng + offset_lng
-
-        # Zombinin oyuncuya ulaşması gereken sokak rotasını hesapla
-        route = get_street_route(z_lat, z_lng, request.lat, request.lng)
+        # Sıçrayan zombi (i == 1) için navigasyon rotası hesaplamıyoruz, boş liste gönderiyoruz
+        route = [] if i == 1 else get_street_route(z_lat, z_lng, request.lat, request.lng)
 
         zombies.append({
             "type": zombie_types[i],
-            "lat": z_lat,  # Başlangıç noktası
+            "lat": z_lat,
             "lng": z_lng,
-            "route": route  # Zombinin adım adım yürüyeceği yol haritası
+            "route": route
         })
-
-    return {"message": "Zombiler yola çıktı", "zombies": zombies}
+    return {"zombies": zombies}
