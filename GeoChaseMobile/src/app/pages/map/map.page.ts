@@ -13,7 +13,8 @@ import { Quest } from 'src/app/services/quest';
 import { ZombieService } from 'src/app/services/zombie-service';
 import { addIcons } from 'ionicons';
 import { scanOutline, skullOutline } from 'ionicons/icons';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { AlertController } from '@ionic/angular';
 
 
 @Component({
@@ -66,6 +67,8 @@ export class MapPage implements OnInit {
   private routingControl: any;
   private zombieMarkers: L.Marker[] = []; // Haritadaki zombi iğnelerini tutmak için dizi
   isZombieMode = false;
+  private activeZombies: any[] = [];
+  private chaseInterval: any;
 
   // 🚀 ÇOKLU GÖREV İÇİN YENİ DEĞİŞKENLER
   activeQuests: any[] = []; // Haritadaki tüm görevlerin listesi (ACTIVE veya PENDING)
@@ -83,13 +86,15 @@ export class MapPage implements OnInit {
     private questService: Quest,
     private cdr: ChangeDetectorRef,
     private zombieService: ZombieService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private alertController: AlertController,
+    private router: Router,
   ) {
     addIcons({ scanOutline, skullOutline });
   }
 
   ngOnInit() {
-    this.route.queryParams.subscribe(params => {
+    this.route.queryParams.subscribe((params) => {
       if (params['mode'] === 'zombie') {
         this.isZombieMode = true;
       }
@@ -383,39 +388,120 @@ export class MapPage implements OnInit {
   }
 
   drawZombiesOnMap(zombies: any[]) {
-    // 1. Önce eski zombileri haritadan temizle (Hareket ediyormuş hissi vermek için)
+    // 1. Önceki döngüyü durdur ve eski zombileri temizle
+    if (this.chaseInterval) clearInterval(this.chaseInterval);
     this.zombieMarkers.forEach((marker) => this.map.removeLayer(marker));
     this.zombieMarkers = [];
+    this.activeZombies = [];
 
-    // 2. Siberpunk tarzı parlayan kırmızı zombi ikonu tasarımı
     const cyberZombieIcon = L.divIcon({
       className: 'cyber-zombie-icon',
-      html: `<div style="
-        width: 16px;
-        height: 16px;
-        background-color: #ff2a2a;
-        border: 2px solid #fff;
-        border-radius: 50%;
-        box-shadow: 0 0 15px #ff2a2a, 0 0 30px #ff2a2a;
-        animation: pulse 1.5s infinite;"></div>`,
+      html: `<div style="width: 16px; height: 16px; background-color: #ff2a2a; border: 2px solid #fff; border-radius: 50%; box-shadow: 0 0 15px #ff2a2a; animation: pulse 1.5s infinite;"></div>`,
       iconSize: [16, 16],
-      iconAnchor: [8, 8], // İkonun tam merkezini koordinata oturtur
+      iconAnchor: [8, 8],
     });
 
+    // 2. Zombileri haritaya yerleştir ve takip listesine ekle
     zombies.forEach((z) => {
       const marker = L.marker([z.lat, z.lng], { icon: cyberZombieIcon }).addTo(
         this.map,
       );
 
-      // Üzerine tıklanınca çıkacak uyarı ekranı
       marker.bindPopup(`
-        <div style="color: red; text-align: center; font-family: monospace;">
-          <strong>⚠ BİYOLOJİK TEHDİT ⚠</strong><br>
-          Sınıf: ${z.type}
+        <div style="color: red; text-align: center;">
+          <strong>⚠ ${z.type} ⚠</strong><br>Sana doğru geliyor!
         </div>
       `);
 
       this.zombieMarkers.push(marker);
+
+      // Zombinin hareket aklını (State) kaydediyoruz
+      this.activeZombies.push({
+        marker: marker,
+        route: z.route || [], // Python'dan gelen sokak rotası
+        currentStep: 0, // Zombi şu an rotanın kaçıncı adımında?
+        type: z.type,
+      });
     });
+
+    // 3. Kovalamaca Motorunu Ateşle!
+    this.startChaseMotor();
+  }
+
+  startChaseMotor() {
+    this.chaseInterval = setInterval(() => {
+      this.activeZombies.forEach((zombie) => {
+        let currentPos = zombie.marker.getLatLng();
+        let targetPos = L.latLng(this.userLat, this.userLng);
+
+        // 1. HAREKET MANTIĞI
+        if (
+          zombie.route &&
+          zombie.route.length > 0 &&
+          zombie.currentStep < zombie.route.length
+        ) {
+          // A) SOKAK TAKİBİ: Rota üzerindeki bir sonraki adıma git
+          const nextPoint = zombie.route[zombie.currentStep];
+          zombie.marker.setLatLng([nextPoint.lat, nextPoint.lng]);
+          zombie.currentStep++;
+        } else {
+          // B) KUŞ UÇUŞU (VEKTÖREL): Doğrudan oyuncunun güncel konumuna yönel
+          // Her saniye mesafenin %10'u kadar sana yaklaşır (Vektörel adım)
+          const moveLat =
+            currentPos.lat + (targetPos.lat - currentPos.lat) * 0.1;
+          const moveLng =
+            currentPos.lng + (targetPos.lng - currentPos.lng) * 0.1;
+          zombie.marker.setLatLng([moveLat, moveLng]);
+        }
+
+        // 2. TEMAS KONTROLÜ (Collision Detection)
+        // Harita üzerindeki gerçek mesafeyi (metre cinsinden) hesaplıyoruz
+        const distance = this.map.distance(
+          zombie.marker.getLatLng(),
+          targetPos,
+        );
+
+        if (distance < 10) {
+          // 10 metreden yakınsa temas sayılır
+          this.handlePlayerCaught(zombie.type);
+        }
+      });
+    }, 1000);
+  }
+
+  // Zombi oyuncuyu yakaladığında çalışacak protokol
+  async handlePlayerCaught(zombieType: string) {
+    // Motoru ve temizlik işlemlerini hemen durdur
+    if (this.chaseInterval) clearInterval(this.chaseInterval);
+
+    // Ekrana uyarı çıkart (Gelişmiş bir Alert kullanıyoruz)
+    const alert = await this.alertController.create({
+      header: 'YAKALANDIN!',
+      subHeader: `${zombieType} tarafından pusuya düşürüldün.`,
+      message: 'Güvenli bölgeye geri çekiliyorsun...',
+      buttons: ['TAMAM'],
+      cssClass: 'zombie-alert', // İstersen CSS ile kırmızı yapabilirsin
+    });
+
+    await alert.present();
+
+    // Haritayı ve sistemleri sıfırla
+    this.resetMapStatus();
+  }
+
+  resetMapStatus() {
+    // Tüm zombi marker'larını haritadan sil
+    this.zombieMarkers.forEach((m) => this.map.removeLayer(m));
+    this.zombieMarkers = [];
+    this.activeZombies = [];
+
+    // Zombi modundan çık veya haritayı ilk haline döndür
+    this.isZombieMode = false;
+    // Kullanıcıyı ana sayfaya yolla veya haritayı temizle
+    this.router.navigate(['/home']);
+  }
+
+  ngonDestroy() {
+    if (this.chaseInterval) clearInterval(this.chaseInterval);
   }
 }
