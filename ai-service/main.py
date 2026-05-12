@@ -40,8 +40,8 @@ def trigger_ambush(request: AmbushRequest):
     zombie_types = ["Sokak Gezgini", "Sıçrayan", "Avcı"]
 
     for i in range(3):
-        z_lat = request.lat + random.uniform(-0.002, 0.002)
-        z_lng = request.lng + random.uniform(-0.002, 0.002)
+        z_lat = request.lat + random.uniform(-0.010, 0.010)
+        z_lng = request.lng + random.uniform(-0.010, 0.010)
 
         # Sıçrayan zombi (i == 1) için navigasyon rotası hesaplamıyoruz, boş liste gönderiyoruz
         route = [] if i == 1 else get_street_route(z_lat, z_lng, request.lat, request.lng)
