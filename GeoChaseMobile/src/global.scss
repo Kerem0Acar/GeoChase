@@ -33,3 +33,78 @@
     opacity: 1;
   }
 }
+
+@keyframes pulse-red {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 10px rgba(255, 42, 42, 0.7);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1.1);
+    box-shadow: 0 0 20px rgba(255, 42, 42, 1);
+    opacity: 0.8;
+  }
+
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 10px rgba(255, 42, 42, 0.7);
+    opacity: 1;
+  }
+}
+
+// 2. Hızlı ve Titrek Parlama (Sıçrayan)
+@keyframes flicker-blue {
+
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 15px #2affff;
+  }
+
+  20% {
+    opacity: 0.6;
+    transform: scale(1.2);
+    box-shadow: 0 0 5px #2affff;
+  }
+
+  40% {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 20px #fff;
+  }
+
+  60% {
+    opacity: 0.8;
+    transform: scale(1.1);
+    box-shadow: 0 0 10px #2affff;
+  }
+
+  80% {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+}
+
+// 3. Karanlık ve Sinsice Parlama (Avcı)
+@keyframes stealth-purple {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 5px #7a2aff;
+    opacity: 0.9;
+  }
+
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px #7a2aff;
+    opacity: 0.6;
+  }
+
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 5px #7a2aff;
+    opacity: 0.9;
+  }
+}

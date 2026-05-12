@@ -105,6 +105,27 @@ export class MapPage implements OnInit {
     await this.initMapAndLocation();
   }
 
+  ionViewWillLeave() {
+    console.log('Harita sayfasından çıkılıyor, temizlik yapılıyor...');
+    this.fullSystemShutdown();
+  }
+
+  fullSystemShutdown() {
+    if(this.chaseInterval){
+      clearInterval(this.chaseInterval);
+      this.chaseInterval = null;
+
+      if(this.zombieMarkers && this.zombieMarkers.length > 0){
+        this.zombieMarkers.forEach(marker => this.map.removeLayer(marker));
+      }
+
+      this.zombieMarkers = [];
+      this.activeZombies = [];
+
+      this.isZombieMode = false;
+    }
+  }
+
   // 1. HARİTAYI VE RADARI BAŞLAT
   async initMapAndLocation() {
     try {
@@ -387,92 +408,125 @@ export class MapPage implements OnInit {
       });
   }
 
-  drawZombiesOnMap(zombies: any[]) {
-    // 1. Önceki döngüyü durdur ve eski zombileri temizle
-    if (this.chaseInterval) clearInterval(this.chaseInterval);
-    this.zombieMarkers.forEach((marker) => this.map.removeLayer(marker));
-    this.zombieMarkers = [];
-    this.activeZombies = [];
+ drawZombiesOnMap(zombies: any[]) {
+  // Önceki temizlik ve interval durdurma işlemleri aynı kalıyor
+  if (this.chaseInterval) clearInterval(this.chaseInterval);
+  this.zombieMarkers.forEach(marker => this.map.removeLayer(marker));
+  this.zombieMarkers = [];
+  this.activeZombies = [];
 
-    const cyberZombieIcon = L.divIcon({
-      className: 'cyber-zombie-icon',
-      html: `<div style="width: 16px; height: 16px; background-color: #ff2a2a; border: 2px solid #fff; border-radius: 50%; box-shadow: 0 0 15px #ff2a2a; animation: pulse 1.5s infinite;"></div>`,
-      iconSize: [16, 16],
-      iconAnchor: [8, 8],
+  // Zombileri haritaya yerleştir ve takip listesine ekle
+  zombies.forEach(z => {
+
+    // --- 🚀 YENİ: Zombi Türüne Göre İkon Belirleme ---
+    let zombieIcon: L.DivIcon;
+    let iconColor: string;
+    let alertColor: string;
+
+    switch (z.type) {
+      case "Sıçrayan": // Kuş Uçuşu Gelen (Cyan Mavi, Titrek)
+        iconColor = "#2affff"; // Parlak Cyan
+        alertColor = "#00cccc"; // Koyu Cyan (Alert için)
+        zombieIcon = L.divIcon({
+          className: 'zombie-icon-leaper',
+          html: `<div style="width: 20px; height: 20px; background-color: ${iconColor}; border: 2px solid #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #000; font-size: 14px; font-weight: bold; animation: flicker-blue 1s infinite; box-shadow: 0 0 15px ${iconColor};">⚡</div>`,
+          iconSize: [20, 20],
+          iconAnchor: [10, 10]
+        });
+        break;
+
+      case "Avcı": // Sinsi (Mor, Yavaş)
+        iconColor = "#7a2aff"; // Mor
+        alertColor = "#5a1fcc";
+        zombieIcon = L.divIcon({
+          className: 'zombie-icon-stalker',
+          html: `<div style="width: 18px; height: 18px; background-color: ${iconColor}; border: 2px solid #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; font-weight: bold; animation: stealth-purple 3s infinite; box-shadow: 0 0 10px ${iconColor};">👁</div>`,
+          iconSize: [18, 18],
+          iconAnchor: [9, 9]
+        });
+        break;
+
+      default: // Sokak Gezgini (Kırmızı, Normal)
+        iconColor = "#ff2a2a"; // Kırmızı
+        alertColor = "#cc1a1a";
+        zombieIcon = L.divIcon({
+          className: 'zombie-icon-walker',
+          html: `<div style="width: 16px; height: 16px; background-color: ${iconColor}; border: 2px solid #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 10px; font-weight: bold; animation: pulse-red 1.5s infinite; box-shadow: 0 0 10px ${iconColor};">🧟</div>`,
+          iconSize: [16, 16],
+          iconAnchor: [8, 8]
+        });
+        break;
+    }
+    // ----------------------------------------------------
+
+    const marker = L.marker([z.lat, z.lng], { icon: zombieIcon }).addTo(this.map);
+
+    // Popup içeriğini de zombi rengine göre güncelliyoruz
+    marker.bindPopup(`
+      <div style="color: ${alertColor}; text-align: center; font-family: monospace;">
+        <strong>⚠ ${z.type} ⚠</strong><br>
+        Sana doğru geliyor!
+      </div>
+    `);
+
+    this.zombieMarkers.push(marker);
+
+    // Zombinin hareket aklını (State) kaydediyoruz (Aynı kalıyor)
+    this.activeZombies.push({
+      marker: marker,
+      route: z.route || [],
+      currentStep: 0,
+      type: z.type
     });
+  });
 
-    // 2. Zombileri haritaya yerleştir ve takip listesine ekle
-    zombies.forEach((z) => {
-      const marker = L.marker([z.lat, z.lng], { icon: cyberZombieIcon }).addTo(
-        this.map,
-      );
-
-      marker.bindPopup(`
-        <div style="color: red; text-align: center;">
-          <strong>⚠ ${z.type} ⚠</strong><br>Sana doğru geliyor!
-        </div>
-      `);
-
-      this.zombieMarkers.push(marker);
-
-      // Zombinin hareket aklını (State) kaydediyoruz
-      this.activeZombies.push({
-        marker: marker,
-        route: z.route || [], // Python'dan gelen sokak rotası
-        currentStep: 0, // Zombi şu an rotanın kaçıncı adımında?
-        type: z.type,
-      });
-    });
-
-    // 3. Kovalamaca Motorunu Ateşle!
-    this.startChaseMotor();
-  }
+  // Kovalamaca Motorunu Ateşle!
+  this.startChaseMotor();
+}
 
   startChaseMotor() {
+    // Süreyi 1 saniyeden 2 saniyeye (2000ms) çıkararak 'Tick Rate'i yavaşlatıyoruz
     this.chaseInterval = setInterval(() => {
       this.activeZombies.forEach((zombie) => {
         let currentPos = zombie.marker.getLatLng();
         let targetPos = L.latLng(this.userLat, this.userLng);
 
-        // 1. HAREKET MANTIĞI
         if (
           zombie.route &&
           zombie.route.length > 0 &&
           zombie.currentStep < zombie.route.length
         ) {
-          // A) SOKAK TAKİBİ: Rota üzerindeki bir sonraki adıma git
+          // A) SOKAK TAKİBİ: Rota noktalarını atlamadan sırayla git (Interval uzadığı için yavaşladı)
           const nextPoint = zombie.route[zombie.currentStep];
           zombie.marker.setLatLng([nextPoint.lat, nextPoint.lng]);
           zombie.currentStep++;
         } else {
-          // B) KUŞ UÇUŞU (VEKTÖREL): Doğrudan oyuncunun güncel konumuna yönel
-          // Her saniye mesafenin %10'u kadar sana yaklaşır (Vektörel adım)
+          // B) KUŞ UÇUŞU (VEKTÖREL): Adım büyüklüğünü %10'dan %3'e düşürüyoruz
+          // Bu, zombinin daha 'ağır' süzülmesini sağlar
           const moveLat =
-            currentPos.lat + (targetPos.lat - currentPos.lat) * 0.1;
+            currentPos.lat + (targetPos.lat - currentPos.lat) * 0.03;
           const moveLng =
-            currentPos.lng + (targetPos.lng - currentPos.lng) * 0.1;
+            currentPos.lng + (targetPos.lng - currentPos.lng) * 0.03;
           zombie.marker.setLatLng([moveLat, moveLng]);
         }
 
-        // 2. TEMAS KONTROLÜ (Collision Detection)
-        // Harita üzerindeki gerçek mesafeyi (metre cinsinden) hesaplıyoruz
+        // Temas kontrolü (Mesafe 10 metrenin altına inerse)
         const distance = this.map.distance(
           zombie.marker.getLatLng(),
           targetPos,
         );
-
         if (distance < 10) {
-          // 10 metreden yakınsa temas sayılır
           this.handlePlayerCaught(zombie.type);
         }
       });
-    }, 1000);
+    }, 2000); // 2 saniyede bir adım
   }
 
   // Zombi oyuncuyu yakaladığında çalışacak protokol
   async handlePlayerCaught(zombieType: string) {
     // Motoru ve temizlik işlemlerini hemen durdur
     if (this.chaseInterval) clearInterval(this.chaseInterval);
+    this.fullSystemShutdown();
 
     // Ekrana uyarı çıkart (Gelişmiş bir Alert kullanıyoruz)
     const alert = await this.alertController.create({
