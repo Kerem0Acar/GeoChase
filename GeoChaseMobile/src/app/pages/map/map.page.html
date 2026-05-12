@@ -3,7 +3,7 @@
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/home"></ion-back-button>
     </ion-buttons>
-    <ion-title>Saha Radarı</ion-title>
+    <ion-title>{{ isZombieMode ? 'KARANTİNA BÖLGESİ' : 'Saha Radarı' }}</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -19,49 +19,36 @@
     </ion-card>
   </div>
 
-  <div class="hud-overlay">
-    
-    <div *ngIf="!isQuestAccepted && !selectedQuest" class="scan-container">
-      <ion-button expand="block" shape="round" color="primary" size="large" 
-                  (click)="scanForQuests()" [disabled]="isScanning" class="scan-btn">
+  <div class="hud-overlay" style="z-index: 10; position: relative; height: 100%; pointer-events: none;">
+
+    <div *ngIf="!isQuestAccepted && !selectedQuest && !isZombieMode" class="scan-container" style="pointer-events: auto; position: absolute; bottom: 20px; width: 100%; padding: 0 15px;">
+      <ion-button expand="block" shape="round" color="primary" size="large" (click)="scanForQuests()" [disabled]="isScanning">
         <ion-spinner *ngIf="isScanning" name="crescent" slot="start"></ion-spinner>
         {{ isScanning ? 'Bölge Taranıyor...' : 'Saha Taraması Yap' }}
       </ion-button>
     </div>
 
-    <ion-card *ngIf="selectedQuest" class="quest-card animate-scale-in">
+    <div *ngIf="isZombieMode" class="scan-container" style="pointer-events: auto; position: absolute; bottom: 20px; width: 100%;">
+      <ion-button color="danger" expand="block" (click)="scanForThreats()" class="cyber-radar-btn" style="margin: 0 15px;">
+        <ion-icon name="skull-outline" slot="start"></ion-icon>
+        RADARI AÇ (TEHDİTLERİ BUL)
+      </ion-button>
+    </div>
+
+    <ion-card *ngIf="selectedQuest" class="quest-card animate-scale-in" style="pointer-events: auto;">
       <ion-card-header>
-        <ion-card-title color="warning" class="ion-text-center">
-          ⚡ HEDEF SEÇİLDİ
-        </ion-card-title>
+        <ion-card-title color="warning" class="ion-text-center">⚡ HEDEF SEÇİLDİ</ion-card-title>
       </ion-card-header>
-      
       <ion-card-content class="ion-text-center">
-        <h2 style="font-weight: bold; font-size: 20px; margin-bottom: 5px; color: white;">
-          {{ selectedQuest.targetName }}
-        </h2>
-        
+        <h2 style="font-weight: bold; font-size: 20px; margin-bottom: 5px; color: white;">{{ selectedQuest.targetName }}</h2>
         <p style="font-size: 16px; margin-bottom: 15px; color: #a2a2a2;">
-          Zorluk: <b [style.color]="selectedQuest.difficulty === 'Zor' ? '#eb445a' : (selectedQuest.difficulty === 'Orta' ? '#ffc409' : '#2dd36f')">{{ selectedQuest.difficulty }}</b> 
+          Zorluk: <b [style.color]="selectedQuest.difficulty === 'Zor' ? '#eb445a' : (selectedQuest.difficulty === 'Orta' ? '#ffc409' : '#2dd36f')">{{ selectedQuest.difficulty }}</b>
           | Ödül: <b style="color: #2dd36f;">{{ selectedQuest.pointReward }} XP</b>
         </p>
-
-        <ion-button *ngIf="selectedQuest.status === 'PENDING'" expand="block" color="tertiary" (click)="acceptSelectedQuest()">
-          ✅ Görevi Kabul Et
-        </ion-button>
-
-        <ion-button *ngIf="selectedQuest.status === 'ACTIVE'" expand="block" color="success" (click)="tryCompleteQuest()">
-          📡 Hedefe Ulaştım (Hack)
-        </ion-button>
-
-        <ion-button *ngIf="selectedQuest.status === 'PENDING'" expand="block" fill="clear" color="medium" (click)="selectedQuest = null" style="margin-top: 5px;">
-          Vazgeç
-        </ion-button>
-
-        <ion-button *ngIf="selectedQuest.status === 'ACTIVE'" expand="block" fill="clear" color="danger" (click)="abandonQuest()" style="margin-top: 5px;">
-          Görevi İptal Et
-        </ion-button>
-        
+        <ion-button *ngIf="selectedQuest.status === 'PENDING'" expand="block" color="tertiary" (click)="acceptSelectedQuest()">✅ Görevi Kabul Et</ion-button>
+        <ion-button *ngIf="selectedQuest.status === 'ACTIVE'" expand="block" color="success" (click)="tryCompleteQuest()">📡 Hedefe Ulaştım (Hack)</ion-button>
+        <ion-button *ngIf="selectedQuest.status === 'PENDING'" expand="block" fill="clear" color="medium" (click)="selectedQuest = null" style="margin-top: 5px;">Vazgeç</ion-button>
+        <ion-button *ngIf="selectedQuest.status === 'ACTIVE'" expand="block" fill="clear" color="danger" (click)="abandonQuest()" style="margin-top: 5px;">Görevi İptal Et</ion-button>
       </ion-card-content>
     </ion-card>
 
