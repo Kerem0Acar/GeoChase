@@ -1,11 +1,12 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core'; 
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { 
+import {
   IonContent, IonHeader, IonTitle, IonToolbar, IonButtons, IonBackButton, IonButton,
-  IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonSpinner 
+  IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonSpinner
 } from '@ionic/angular/standalone';
 import * as L from 'leaflet';
+import 'leaflet-routing-machine';
 import { Geolocation } from '@capacitor/geolocation';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { Quest } from 'src/app/services/quest';
@@ -16,8 +17,8 @@ import { Quest } from 'src/app/services/quest';
   styleUrls: ['./map.page.scss'],
   standalone: true,
   imports: [
-    IonContent, IonHeader, IonTitle, IonToolbar, IonButtons, IonBackButton, IonButton, 
-    IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonSpinner, 
+    IonContent, IonHeader, IonTitle, IonToolbar, IonButtons, IonBackButton, IonButton,
+    IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonSpinner,
     CommonModule, FormsModule
   ],
   // 🚀 İŞTE SİHİRLİ DOKUNUŞ: Animasyon kuralını buraya ekledik!
@@ -40,7 +41,8 @@ export class MapPage implements OnInit {
 
   map: any;
   userMarker: any;
-  
+  private routingControl: any;
+
   // 🚀 ÇOKLU GÖREV İÇİN YENİ DEĞİŞKENLER
   activeQuests: any[] = []; // Haritadaki tüm görevlerin listesi (ACTIVE veya PENDING)
   questMarkers: any[] = []; // Haritadaki Leaflet iğnelerini tuttuğumuz dizi (silmek için)
@@ -48,7 +50,7 @@ export class MapPage implements OnInit {
 
   userLat: number = 0;
   userLng: number = 0;
-  isScanning: boolean = false; 
+  isScanning: boolean = false;
   showSignalsAlert: boolean = false;
   isFadingOut: boolean = false;
 
@@ -65,11 +67,11 @@ export class MapPage implements OnInit {
   async initMapAndLocation() {
     try {
       console.log('GPS Uydularına bağlanılıyor...');
-      
+
       const position = await Geolocation.getCurrentPosition();
       this.userLat = position.coords.latitude;
       this.userLng = position.coords.longitude;
-      
+
       if (this.map) this.map.remove();
 
       this.map = L.map('mapId', { zoomControl: false }).setView([this.userLat, this.userLng], 15);
@@ -85,7 +87,7 @@ export class MapPage implements OnInit {
           <div class="radar-core"></div>
         `,
         iconSize: [40, 40],
-        iconAnchor: [20, 20] 
+        iconAnchor: [20, 20]
       });
 
       this.userMarker = L.marker([this.userLat, this.userLng], {icon: userIcon}).addTo(this.map)
@@ -112,7 +114,7 @@ export class MapPage implements OnInit {
       next: (quests: any[]) => {
         // Hem aktif olanları hem de bekleyenleri listeye al
         this.activeQuests = quests.filter(q => q.status === 'ACTIVE');
-        
+
         if (this.activeQuests.length > 0) {
           // Eğer tek bir ACTIVE görev varsa, onu otomatik seçili yap
           const active = this.activeQuests.find(q => q.status === 'ACTIVE');
@@ -130,25 +132,25 @@ export class MapPage implements OnInit {
   scanForQuests() {
     this.isScanning = true;
     this.questService.generateQuest(this.userLat, this.userLng).subscribe({
-      next: (newQuests: any[]) => { 
+      next: (newQuests: any[]) => {
         this.activeQuests = newQuests;
-        this.selectedQuest = null; 
+        this.selectedQuest = null;
         this.drawAllQuestMarkers();
         this.isScanning = false;
-        
+
         // 🚀 İŞTE SİHİR BURADA: Kartı göster, 3.5 saniye sonra gizle!
         this.showSignalsAlert = true;
         this.isFadingOut = false; // Başlangıçta tam görünür
 
         setTimeout(() => {
           // 1. Aşama: 3.5 saniye sonra CSS "erime" animasyonunu başlat
-          this.isFadingOut = true; 
-          
+          this.isFadingOut = true;
+
           setTimeout(() => {
             // 2. Aşama: Erime bittikten sonra (600ms) kartı ekrandan tamamen sil
             this.showSignalsAlert = false;
             this.isFadingOut = false;
-          }, 600); 
+          }, 600);
 
         }, 3500);
 
@@ -212,16 +214,17 @@ export class MapPage implements OnInit {
       next: () => {
         alert("Görev Kabul Edildi! Hedefe doğru ilerle.");
         this.selectedQuest.status = 'ACTIVE';
-        
+
         // Diğer çöpe giden (PENDING) görevleri listemizden temizle
         this.activeQuests = [this.selectedQuest];
-        
+
         // Haritayı güncelle (Diğer 4 iğne yok olacak)
-        this.drawAllQuestMarkers(); 
+        this.drawAllQuestMarkers();
         this.map.setView([this.userLat, this.userLng], 15);
       },
       error: (err: any) => alert(err.error || "Görev kabul edilemedi.")
     });
+    this.drawRouteToQuest(); // Görevi kabul eder etmez rotayı çiz!
   }
 
   // 4. GÖREVİ TAMAMLAMAYI DENE
@@ -231,14 +234,16 @@ export class MapPage implements OnInit {
     Geolocation.getCurrentPosition().then(pos => {
       this.questService.completeQuest(this.selectedQuest.id, pos.coords.latitude, pos.coords.longitude).subscribe({
         next: (responseMessage: string) => {
-          alert(responseMessage); 
-          this.clearQuest(); 
+          alert(responseMessage);
+          this.clearQuest();
         },
         error: (err: any) => {
           alert(err.error || 'Görev tamamlanamadı.');
         }
       });
     }).catch(err => alert("Güncel konum alınamadı!"));
+
+
   }
 
   // 5. GÖREVİ İPTAL ET
@@ -253,6 +258,11 @@ export class MapPage implements OnInit {
         },
         error: (err: any) => alert("İptal işlemi başarısız.")
       });
+
+      if (this.routingControl) {
+        this.map.removeControl(this.routingControl);
+        this.routingControl = null;
+      }
     }
   }
 
@@ -265,5 +275,29 @@ export class MapPage implements OnInit {
       this.questMarkers = [];
     }
     this.map.setView([this.userLat, this.userLng], 15);
+  }
+
+  drawRouteToQuest() {
+    if (this.routingControl) {
+      this.map.removeControl(this.routingControl);
+    }
+
+    if (this.selectedQuest && this.userLat && this.userLng) {
+      const routingOptions: any = {
+        waypoints: [
+          L.latLng(this.userLat, this.userLng),
+          L.latLng(this.selectedQuest.targetLatitude, this.selectedQuest.targetLongitude)
+        ],
+        lineOptions: {
+          styles: [{ color: '#2dd36f', opacity: 0.8, weight: 6 }]
+        },
+        addWaypoints: false,
+        draggableWaypoints: false,
+        fitSelectedRoutes: true,
+        show: false
+      };
+
+      this.routingControl = (L as any).Routing.control(routingOptions).addTo(this.map);
+    }
   }
 }

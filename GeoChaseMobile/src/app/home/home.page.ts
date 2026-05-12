@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { 
-  IonHeader, IonToolbar, IonTitle, IonContent, IonButton, 
+import {
+  IonHeader, IonToolbar, IonTitle, IonContent, IonButton,
   IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCardContent,
   IonText, IonSpinner, IonButtons } from '@ionic/angular/standalone';
 import { Auth } from '../services/auth';
@@ -12,10 +12,10 @@ import { Auth } from '../services/auth';
   templateUrl: 'home.page.html',
   styleUrls: ['home.page.scss'],
   standalone: true,
-  imports: [IonButtons, 
+  imports: [IonButtons,
     IonHeader, IonToolbar, IonTitle, IonContent, IonButton,
-    IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCardContent,
-    IonText, IonSpinner, CommonModule
+    IonCard, IonCardHeader, IonCardTitle, IonCardContent,
+    IonSpinner, CommonModule
   ],
 })
 export class HomePage implements OnInit {
@@ -60,7 +60,7 @@ export class HomePage implements OnInit {
 
   getXpProgress(): number {
     if (!this.playerProfile || this.playerProfile.score === undefined) return 0;
-    
+
     const score = this.playerProfile.score;
     const level = this.playerProfile.level || 1;
 
@@ -68,19 +68,19 @@ export class HomePage implements OnInit {
     let maxScore = 500;
 
     // Senin backend'deki if-else mantığının Frontend'deki karşılığı
-    if (level === 1) { 
-      minScore = 0; 
-      maxScore = 500; 
-    } 
-    else if (level === 2) { 
-      minScore = 500; 
-      maxScore = 1000; 
-    } 
-    else if (level === 3) { 
-      minScore = 1000; 
-      maxScore = 2000; 
-    } 
-    else { 
+    if (level === 1) {
+      minScore = 0;
+      maxScore = 500;
+    }
+    else if (level === 2) {
+      minScore = 500;
+      maxScore = 1000;
+    }
+    else if (level === 3) {
+      minScore = 1000;
+      maxScore = 2000;
+    }
+    else {
       return 100; // Level 4 veya üstü (Maksimum Seviye) bar hep full kalır
     }
 
